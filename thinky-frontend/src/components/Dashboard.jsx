@@ -18,7 +18,7 @@ const initialQuotes = [
 ];
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
-import { Box, Flex, Heading, Spacer, Button, IconButton, useColorMode, Input, Stack } from "@chakra-ui/react";
+import { Box, Flex, Heading, Spacer, Button, IconButton, useColorMode, Input, Stack, ScaleFade } from "@chakra-ui/react";
 import { SunIcon, MoonIcon } from "@chakra-ui/icons";
 
 const navItems = ["Calendar", "Habits", "Goals", "Worries", "Gratitude", "Spending"];
@@ -149,52 +149,58 @@ export default function Dashboard() {
   return (
     <Box minH="100vh" bg={colorMode === "light" ? "gray.50" : "gray.800"}>
       <Box as="nav" p={4} bg={colorMode === "light" ? "white" : "gray.900"} boxShadow="md">
-        <Stack direction={{ base: "column", md: "row" }} spacing={2} align="center" justify="center">
-          {navItems.slice(0, 3).map(item => (
-            <Button key={item} variant={activeSection === item ? "solid" : "ghost"} mx={2} colorScheme="teal" onClick={() => handleNavClick(item)}>
-              {item}
+          <Stack direction={{ base: "column", md: "row" }} spacing={2} align="center" justify="center">
+            {/* Top row: Calendar, Habits, Theme toggle */}
+            <Button variant={activeSection === navItems[0] ? "solid" : "ghost"} colorScheme="teal" size="md" fontWeight="bold" boxShadow={activeSection === navItems[0] ? "md" : "none"} transition="all 0.2s" onClick={() => handleNavClick(navItems[0])}>
+              {navItems[0]}
             </Button>
-          ))}
-          <IconButton
-            aria-label="Toggle theme"
-            icon={colorMode === "light" ? <MoonIcon /> : <SunIcon />}
-            onClick={toggleColorMode}
-            colorScheme="teal"
-            ml={2}
-          />
-        </Stack>
-        <Stack direction={{ base: "column", md: "row" }} spacing={2} align="center" justify="center" mt={2}>
-          {navItems.slice(3).map(item => (
-            <Button key={item} variant={activeSection === item ? "solid" : "ghost"} mx={2} colorScheme="teal" onClick={() => handleNavClick(item)}>
-              {item}
+            <Button variant={activeSection === navItems[1] ? "solid" : "ghost"} colorScheme="teal" size="md" fontWeight="bold" boxShadow={activeSection === navItems[1] ? "md" : "none"} transition="all 0.2s" onClick={() => handleNavClick(navItems[1])}>
+              {navItems[1]}
             </Button>
-          ))}
-        </Stack>
+            <IconButton
+              aria-label="Toggle theme"
+              icon={colorMode === "light" ? <MoonIcon /> : <SunIcon />}
+              onClick={toggleColorMode}
+              colorScheme="teal"
+              size="md"
+              boxShadow="md"
+              ml={2}
+              transition="all 0.2s"
+            />
+          </Stack>
+          <Stack direction={{ base: "column", md: "row" }} spacing={2} align="center" justify="center" mt={2}>
+            {/* Second row: Goals, Worries, Gratitude, Spending */}
+            {navItems.slice(2).map(item => (
+              <Button key={item} variant={activeSection === item ? "solid" : "ghost"} colorScheme="teal" size="md" fontWeight="bold" boxShadow={activeSection === item ? "md" : "none"} transition="all 0.2s" onClick={() => handleNavClick(item)}>
+                {item}
+              </Button>
+            ))}
+          </Stack>
       </Box>
       <Box p={8} display="flex" flexDirection="column" alignItems="center">
-        {activeSection === "Calendar" && (
-          <Box mb={8}>
-            <Calendar
-              onChange={handleDateChange}
-              value={selectedDate}
-            />
+        <ScaleFade in={activeSection === "Calendar"} initialScale={0.8} unmountOnExit transition={{ enter: { duration: 0.6 }, exit: { duration: 0.3 } }}>
+          <Box>
+            <Box mb={8}>
+              <Calendar
+                onChange={handleDateChange}
+                value={selectedDate}
+              />
+            </Box>
+            <Stack spacing={4} maxW="md" w="100%" align="center">
+              <Heading size="md">
+                Add appointment for {selectedDate.getDate()}-{selectedDate.getMonth() + 1}-{selectedDate.getFullYear()}
+              </Heading>
+              <Input
+                placeholder="Type your appointment..."
+                value={inputValue}
+                onChange={e => setInputValue(e.target.value)}
+              />
+              <Button colorScheme="teal" onClick={handleAdd}>
+                Add
+              </Button>
+            </Stack>
           </Box>
-        )}
-        {activeSection === "Calendar" && (
-          <Stack spacing={4} maxW="md" w="100%" align="center">
-            <Heading size="md">
-              Add appointment for {selectedDate.getDate()}-{selectedDate.getMonth() + 1}-{selectedDate.getFullYear()}
-            </Heading>
-            <Input
-              placeholder="Type your appointment..."
-              value={inputValue}
-              onChange={e => setInputValue(e.target.value)}
-            />
-            <Button colorScheme="teal" onClick={handleAdd}>
-              Add
-            </Button>
-          </Stack>
-        )}
+        </ScaleFade>
         {activeSection === "Habits" && (
           (() => {
             const dateKey = selectedDate.toISOString().split('T')[0];
