@@ -84,7 +84,7 @@ export default function Dashboard() {
       .catch(() => setHabits([]));
   }, []);
   const [gratitude, setGratitude] = useState([]);
-  const [gratitudeInputs, setGratitudeInputs] = useState(["", "", ""]);
+  const [gratitudeInput, setGratitudeInput] = useState("");
   const [showConfirm, setShowConfirm] = useState(false);
   const [worries, setWorries] = useState([]);
   const [goals, setGoals] = useState([]);
@@ -264,32 +264,24 @@ export default function Dashboard() {
             return (
               <Stack spacing={4} maxW="md" w="100%" align="center">
                 <Heading size="md">What are you grateful for today?</Heading>
-                {gratitudeInputs.map((val, idx) => (
-                  <Input
-                    key={idx}
-                    placeholder={`Gratitude ${idx + 1}`}
-                    value={val}
-                    onChange={e => {
-                      const newInputs = [...gratitudeInputs];
-                      newInputs[idx] = e.target.value;
-                      setGratitudeInputs(newInputs);
-                    }}
-                  />
-                ))}
+                <Input
+                  placeholder="Type your gratitude..."
+                  value={gratitudeInput}
+                  onChange={e => setGratitudeInput(e.target.value)}
+                />
                 <Button colorScheme="teal" onClick={async () => {
-                  const newEntries = gratitudeInputs.filter(entry => entry.trim() !== "");
-                  if (newEntries.length === 0) return;
+                  if (!gratitudeInput.trim()) return;
                   const res = await fetch('http://127.0.0.1:5000/gratitude', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ date: dateKey, entries: newEntries })
+                    body: JSON.stringify({ date: dateKey, entries: [gratitudeInput.trim()] })
                   });
                   const saved = await res.json();
                   setGratitude(prev => [...prev, ...saved.map((entry, i) => ({
                     ...entry,
                     display: `${dateKey}.${prev.length + i + 1}`
                   }))]);
-                  setGratitudeInputs(["", "", ""]);
+                  setGratitudeInput("");
                   setShowConfirm(true);
                   setTimeout(() => setShowConfirm(false), 2000);
                 }}>
