@@ -19,6 +19,7 @@ const initialQuotes = [
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import { Box, Flex, Heading, Spacer, Button, IconButton, useColorMode, Input, Stack, ScaleFade } from "@chakra-ui/react";
+import { motion } from "framer-motion";
 import { SunIcon, MoonIcon } from "@chakra-ui/icons";
 
 const navItems = ["Calendar", "Habits", "Goals", "Worries", "Gratitude", "Spending"];
@@ -151,12 +152,21 @@ export default function Dashboard() {
       <Box as="nav" p={4} bg={colorMode === "light" ? "white" : "gray.900"} boxShadow="md">
           <Stack direction={{ base: "column", md: "row" }} spacing={2} align="center" justify="center">
             {/* Top row: Calendar, Habits, Theme toggle */}
-            <Button variant={activeSection === navItems[0] ? "solid" : "ghost"} colorScheme="teal" size="md" fontWeight="bold" boxShadow={activeSection === navItems[0] ? "md" : "none"} transition="all 0.2s" onClick={() => handleNavClick(navItems[0])}>
-              {navItems[0]}
-            </Button>
-            <Button variant={activeSection === navItems[1] ? "solid" : "ghost"} colorScheme="teal" size="md" fontWeight="bold" boxShadow={activeSection === navItems[1] ? "md" : "none"} transition="all 0.2s" onClick={() => handleNavClick(navItems[1])}>
-              {navItems[1]}
-            </Button>
+            {[0, 1].map(idx => (
+              <Box as={motion.div} key={navItems[idx]}
+                animate={activeSection === navItems[idx] ? { scale: 1.15, boxShadow: "0 0 0 4px #31979533" } : { scale: 1, boxShadow: "none" }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}>
+                <Button
+                  variant={activeSection === navItems[idx] ? "solid" : "ghost"}
+                  colorScheme="teal"
+                  size="md"
+                  fontWeight="bold"
+                  onClick={() => handleNavClick(navItems[idx])}
+                >
+                  {navItems[idx]}
+                </Button>
+              </Box>
+            ))}
             <IconButton
               aria-label="Toggle theme"
               icon={colorMode === "light" ? <MoonIcon /> : <SunIcon />}
@@ -171,9 +181,19 @@ export default function Dashboard() {
           <Stack direction={{ base: "column", md: "row" }} spacing={2} align="center" justify="center" mt={2}>
             {/* Second row: Goals, Worries, Gratitude, Spending */}
             {navItems.slice(2).map(item => (
-              <Button key={item} variant={activeSection === item ? "solid" : "ghost"} colorScheme="teal" size="md" fontWeight="bold" boxShadow={activeSection === item ? "md" : "none"} transition="all 0.2s" onClick={() => handleNavClick(item)}>
-                {item}
-              </Button>
+              <Box as={motion.div} key={item}
+                animate={activeSection === item ? { scale: 1.15, boxShadow: "0 0 0 4px #31979533" } : { scale: 1, boxShadow: "none" }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}>
+                <Button
+                  variant={activeSection === item ? "solid" : "ghost"}
+                  colorScheme="teal"
+                  size="md"
+                  fontWeight="bold"
+                  onClick={() => handleNavClick(item)}
+                >
+                  {item}
+                </Button>
+              </Box>
             ))}
           </Stack>
       </Box>
@@ -201,8 +221,8 @@ export default function Dashboard() {
             </Stack>
           </Box>
         </ScaleFade>
-        {activeSection === "Habits" && (
-          (() => {
+        <ScaleFade in={activeSection === "Habits"} initialScale={0.8} unmountOnExit transition={{ enter: { duration: 0.6 }, exit: { duration: 0.3 } }}>
+          {activeSection === "Habits" && (() => {
             const dateKey = selectedDate.toISOString().split('T')[0];
             return (
               <Stack spacing={4} maxW="md" w="100%" align="center">
@@ -236,10 +256,10 @@ export default function Dashboard() {
                 )}
               </Stack>
             );
-          })()
-        )}
-        {activeSection === "Gratitude" && (
-          (() => {
+          })()}
+        </ScaleFade>
+        <ScaleFade in={activeSection === "Gratitude"} initialScale={0.8} unmountOnExit transition={{ enter: { duration: 0.6 }, exit: { duration: 0.3 } }}>
+          {activeSection === "Gratitude" && (() => {
             const dateKey = selectedDate.toISOString().split('T')[0];
             return (
               <Stack spacing={4} maxW="md" w="100%" align="center">
@@ -292,10 +312,10 @@ export default function Dashboard() {
                 )}
               </Stack>
             );
-          })()
-        )}
-        {activeSection === "Goals" && (
-          (() => {
+          })()}
+        </ScaleFade>
+        <ScaleFade in={activeSection === "Goals"} initialScale={0.8} unmountOnExit transition={{ enter: { duration: 0.6 }, exit: { duration: 0.3 } }}>
+          {activeSection === "Goals" && (() => {
             const dateKey = selectedDate.toISOString().split('T')[0];
             return (
               <Stack spacing={4} maxW="md" w="100%" align="center">
@@ -329,10 +349,10 @@ export default function Dashboard() {
                 )}
               </Stack>
             );
-          })()
-        )}
-        {activeSection === "Worries" && (
-          (() => {
+          })()}
+        </ScaleFade>
+        <ScaleFade in={activeSection === "Worries"} initialScale={0.8} unmountOnExit transition={{ enter: { duration: 0.6 }, exit: { duration: 0.3 } }}>
+          {activeSection === "Worries" && (() => {
             const dateKey = selectedDate.toISOString().split('T')[0];
             return (
               <Stack spacing={4} maxW="md" w="100%" align="center">
@@ -366,10 +386,10 @@ export default function Dashboard() {
                 )}
               </Stack>
             );
-          })()
-        )}
-        {activeSection === "Spending" && (
-          (() => {
+          })()}
+        </ScaleFade>
+        <ScaleFade in={activeSection === "Spending"} initialScale={0.8} unmountOnExit transition={{ enter: { duration: 0.6 }, exit: { duration: 0.3 } }}>
+          {activeSection === "Spending" && (() => {
             const dateKey = selectedDate.toISOString().split('T')[0];
             return (
               <Stack spacing={4} maxW="md" w="100%" align="center">
@@ -424,8 +444,8 @@ export default function Dashboard() {
                 )}
               </Stack>
             );
-          })()
-        )}
+          })()}
+        </ScaleFade>
         {activeSection === "Calendar" && events[selectedDate.toISOString().split('T')[0]] && events[selectedDate.toISOString().split('T')[0]].length > 0 && (
           <Box mt={8} w="100%" maxW="md">
             <Heading size="md" mb={2}>Events for Today:</Heading>
