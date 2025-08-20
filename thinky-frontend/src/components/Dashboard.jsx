@@ -79,6 +79,10 @@ export default function Dashboard() {
 
   useEffect(() => {
     pickLocalQuote();
+    const interval = setInterval(() => {
+      pickLocalQuote();
+    }, 600000); // 10 minutes
+    return () => clearInterval(interval);
   }, [quotes]);
   const handleAddQuote = () => {
     if (!quoteInput) return;
@@ -487,11 +491,7 @@ export default function Dashboard() {
               <Box color="red.500">Could not fetch weather.</Box>
             )}
           </Box>
-          <Heading size="md" mb={2}>Quotes</Heading>
           <Box p={4} bg="yellow.100" borderRadius="md" mb={4}>{currentQuote}</Box>
-          <Button colorScheme="yellow" size="sm" mr={2} onClick={pickLocalQuote}>Show Local Quote</Button>
-          <Button colorScheme="yellow" size="sm" onClick={fetchApiQuote}>Show API Quote</Button>
-          {/* Removed add quote input and button as requested */}
         </Box>
       </Box>
     </Box>
