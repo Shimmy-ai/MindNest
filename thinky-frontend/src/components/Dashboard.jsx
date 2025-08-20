@@ -21,10 +21,31 @@ import 'react-calendar/dist/Calendar.css';
 import { Box, Flex, Heading, Spacer, Button, IconButton, useColorMode, Input, Stack, ScaleFade } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 import { SunIcon, MoonIcon } from "@chakra-ui/icons";
+// Weather API for Stockholm, Sweden
+const WEATHER_API = "https://api.open-meteo.com/v1/forecast?latitude=59.3293&longitude=18.0686&current_weather=true";
 
 const navItems = ["Calendar", "Habits", "Goals", "Worries", "Gratitude", "Spending"];
 
 export default function Dashboard() {
+  // Weather state
+  const [weather, setWeather] = useState(null);
+  const [weatherLoading, setWeatherLoading] = useState(true);
+  useEffect(() => {
+    async function fetchWeather() {
+      setWeatherLoading(true);
+      try {
+        const res = await fetch(WEATHER_API);
+        const data = await res.json();
+        setWeather(data.current_weather);
+      } catch {
+        setWeather(null);
+      }
+      setWeatherLoading(false);
+    }
+    fetchWeather();
+    const interval = setInterval(fetchWeather, 600000); // update every 10 min
+    return () => clearInterval(interval);
+  }, []);
   // Add state for showing gratitude inputs
   const [showGratitudeInputs, setShowGratitudeInputs] = useState(false);
   const { colorMode, toggleColorMode } = useColorMode();
@@ -450,7 +471,22 @@ export default function Dashboard() {
             </Stack>
           </Box>
         )}
+        {/* Weather widget above Quotes */}
         <Box mt={8} w="100%" maxW="md" textAlign="center">
+          <Box mb={4} p={4} bg={colorMode === "light" ? "blue.50" : "blue.900"} borderRadius="md" boxShadow="md">
+            <Heading size="sm" mb={2} color="blue.700">Weather in Stockholm, Sweden</Heading>
+            {weatherLoading ? (
+              <Box>Loading weather...</Box>
+            ) : weather ? (
+              <Box>
+                <b>{weather.temperature}°C</b> &nbsp;
+                <span>Wind: {weather.windspeed} km/h</span>
+                <Box fontSize="sm" color="gray.500" mt={1}>Updated just now</Box>
+              </Box>
+            ) : (
+              <Box color="red.500">Could not fetch weather.</Box>
+            )}
+          </Box>
           <Heading size="md" mb={2}>Quotes</Heading>
           <Box p={4} bg="yellow.100" borderRadius="md" mb={4}>{currentQuote}</Box>
           <Button colorScheme="yellow" size="sm" mr={2} onClick={pickLocalQuote}>Show Local Quote</Button>
