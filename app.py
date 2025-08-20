@@ -12,6 +12,7 @@ db = SQLAlchemy()
 app = Flask(__name__)
 CORS(app)
 
+# Database setup (SQLite file in project root)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///thinky.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
@@ -40,7 +41,6 @@ app.register_blueprint(spending_bp)
 
 with app.app_context():
     db.create_all()
-
 
 # ----------------- CRUD for Habits -----------------
 @app.route("/habits", methods=["GET", "POST"])
@@ -154,6 +154,6 @@ def index():
     })
 
 
-# ----------------- Run server -----------------yy
+# ----------------- Run server -----------------
 if __name__ == "__main__":
     app.run(debug=True)
