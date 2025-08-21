@@ -237,122 +237,124 @@ export default function Dashboard() {
   return (
     <Box minH="100vh" bg={colorMode === "light" ? "gray.50" : "gray.800"}>
       {/* User Registration Modal Trigger Icon */}
-      <Box position="absolute" top={4} right={4} zIndex={2}>
+      <Box position="fixed" top={2} right={2} zIndex={2} display={{ base: "none", md: "block" }}>
         <IconButton
           aria-label="Add user"
           icon={<AddIcon />}
           onClick={onOpen}
           colorScheme="teal"
-          size="md"
+          size={{ base: "sm", md: "md" }}
           ml={2}
           boxShadow="md"
         />
       </Box>
-      <Modal isOpen={isOpen} onClose={onClose} isCentered>
+      <Modal isOpen={isOpen} onClose={onClose} isCentered size={{ base: "xs", md: "md" }}>
         <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Add User</ModalHeader>
+        <ModalContent mx={{ base: 2, md: 0 }}>
+          <ModalHeader fontSize={{ base: "md", md: "lg" }}>Add User</ModalHeader>
           <ModalBody>
             <Stack spacing={3}>
-              <Input placeholder="Username" value={newUsername} onChange={e => setNewUsername(e.target.value)} />
-              <Input placeholder="Password" type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} />
+              <Input fontSize={{ base: "sm", md: "md" }} placeholder="Username" value={newUsername} onChange={e => setNewUsername(e.target.value)} />
+              <Input fontSize={{ base: "sm", md: "md" }} placeholder="Password" type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} />
               {userMsg && <Box color="red.500">{userMsg}</Box>}
             </Stack>
           </ModalBody>
           <ModalFooter>
-            <Button colorScheme="teal" mr={3} onClick={handleAddUser}>Add User</Button>
-            <Button variant="ghost" onClick={onClose}>Close</Button>
+            <Button colorScheme="teal" mr={3} onClick={handleAddUser} fontSize={{ base: "sm", md: "md" }}>Add User</Button>
+            <Button variant="ghost" onClick={onClose} fontSize={{ base: "sm", md: "md" }}>Close</Button>
           </ModalFooter>
         </ModalContent>
       </Modal>
-      <Box as="nav" p={4} bg={colorMode === "light" ? "white" : "gray.900"} boxShadow="md">
-          <Stack direction={{ base: "column", md: "row" }} spacing={2} align="center" justify="center">
-            {/* Top row: Calendar, Habits, Add User, Theme toggle */}
-            <Box as={motion.div} key={navItems[0]}
-              animate={activeSection === navItems[0] ? { scale: 1.15, boxShadow: "0 0 0 4px #31979533" } : { scale: 1, boxShadow: "none" }}
-              transition={{ type: "spring", stiffness: 300, damping: 20 }}>
-              <Button
-                variant={activeSection === navItems[0] ? "solid" : "ghost"}
-                colorScheme="teal"
-                size="md"
-                fontWeight="bold"
-                onClick={() => handleNavClick(navItems[0])}
-              >
-                {navItems[0]}
-              </Button>
-            </Box>
-            <Box as={motion.div} key={navItems[1]}
-              animate={activeSection === navItems[1] ? { scale: 1.15, boxShadow: "0 0 0 4px #31979533" } : { scale: 1, boxShadow: "none" }}
-              transition={{ type: "spring", stiffness: 300, damping: 20 }}>
-              <Button
-                variant={activeSection === navItems[1] ? "solid" : "ghost"}
-                colorScheme="teal"
-                size="md"
-                fontWeight="bold"
-                onClick={() => handleNavClick(navItems[1])}
-              >
-                {navItems[1]}
-              </Button>
-            </Box>
-            <Button colorScheme="teal" variant="outline" size="md" ml={2} onClick={loginDisclosure.onOpen}>Login</Button>
-      <Modal isOpen={loginDisclosure.isOpen} onClose={loginDisclosure.onClose} initialFocusRef={initialRef} isCentered>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Login</ModalHeader>
-          <ModalBody pb={6}>
-            <Stack spacing={3}>
-              <Input ref={initialRef} placeholder="Username" value={loginUsername} onChange={e => setLoginUsername(e.target.value)} />
-              <Input placeholder="Password" type="password" value={loginPassword} onChange={e => setLoginPassword(e.target.value)} />
-              {loginMsg && <Box color="red.500">{loginMsg}</Box>}
-            </Stack>
-          </ModalBody>
-          <ModalFooter>
-            <Button colorScheme="teal" mr={3} onClick={handleLogin}>Login</Button>
-            <Button variant="ghost" onClick={loginDisclosure.onClose}>Cancel</Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
-            {/* Add User Icon in between Habits and Theme toggle */}
+      <Box as="nav" p={{ base: 2, md: 4 }} bg={colorMode === "light" ? "white" : "gray.900"} boxShadow="md" w="100%">
+        <Stack direction={{ base: "column", md: "row" }} spacing={{ base: 1, md: 2 }} align="center" justify="center" wrap="wrap">
+          {/* Top row: Calendar, Habits, Add User, Theme toggle */}
+          <Box as={motion.div} key={navItems[0]}
+            animate={activeSection === navItems[0] ? { scale: 1.15, boxShadow: "0 0 0 4px #31979533" } : { scale: 1, boxShadow: "none" }}
+            transition={{ type: "spring", stiffness: 300, damping: 20 }}>
+            <Button
+              variant={activeSection === navItems[0] ? "solid" : "ghost"}
+              colorScheme="teal"
+              size={{ base: "sm", md: "md" }}
+              fontWeight="bold"
+              onClick={() => handleNavClick(navItems[0])}
+            >
+              {navItems[0]}
+            </Button>
+          </Box>
+          <Box as={motion.div} key={navItems[1]}
+            animate={activeSection === navItems[1] ? { scale: 1.15, boxShadow: "0 0 0 4px #31979533" } : { scale: 1, boxShadow: "none" }}
+            transition={{ type: "spring", stiffness: 300, damping: 20 }}>
+            <Button
+              variant={activeSection === navItems[1] ? "solid" : "ghost"}
+              colorScheme="teal"
+              size={{ base: "sm", md: "md" }}
+              fontWeight="bold"
+              onClick={() => handleNavClick(navItems[1])}
+            >
+              {navItems[1]}
+            </Button>
+          </Box>
+          <Button colorScheme="teal" variant="outline" size={{ base: "sm", md: "md" }} ml={2} onClick={loginDisclosure.onOpen}>Login</Button>
+          <Modal isOpen={loginDisclosure.isOpen} onClose={loginDisclosure.onClose} initialFocusRef={initialRef} isCentered size={{ base: "xs", md: "md" }}>
+            <ModalOverlay />
+            <ModalContent mx={{ base: 2, md: 0 }}>
+              <ModalHeader fontSize={{ base: "md", md: "lg" }}>Login</ModalHeader>
+              <ModalBody pb={6}>
+                <Stack spacing={3}>
+                  <Input fontSize={{ base: "sm", md: "md" }} ref={initialRef} placeholder="Username" value={loginUsername} onChange={e => setLoginUsername(e.target.value)} />
+                  <Input fontSize={{ base: "sm", md: "md" }} placeholder="Password" type="password" value={loginPassword} onChange={e => setLoginPassword(e.target.value)} />
+                  {loginMsg && <Box color="red.500">{loginMsg}</Box>}
+                </Stack>
+              </ModalBody>
+              <ModalFooter>
+                <Button colorScheme="teal" mr={3} onClick={handleLogin} fontSize={{ base: "sm", md: "md" }}>Login</Button>
+                <Button variant="ghost" onClick={loginDisclosure.onClose} fontSize={{ base: "sm", md: "md" }}>Cancel</Button>
+              </ModalFooter>
+            </ModalContent>
+          </Modal>
+          {/* Add User Icon in between Habits and Theme toggle, only on mobile */}
+          <Box display={{ base: "block", md: "none" }}>
             <IconButton
               aria-label="Add user"
               icon={<AddIcon />}
               onClick={onOpen}
               colorScheme="teal"
-              size="md"
+              size="sm"
               boxShadow="md"
               ml={2}
             />
-            <IconButton
-              aria-label="Toggle theme"
-              icon={colorMode === "light" ? <MoonIcon /> : <SunIcon />}
-              onClick={toggleColorMode}
-              colorScheme="teal"
-              size="md"
-              boxShadow="md"
-              ml={2}
-              transition="all 0.2s"
-            />
-          </Stack>
-          <Stack direction={{ base: "column", md: "row" }} spacing={2} align="center" justify="center" mt={2}>
-            {/* Second row: Goals, Worries, Gratitude, Spending */}
-            {navItems.slice(2).map(item => (
-              <Box as={motion.div} key={item}
-                animate={activeSection === item ? { scale: 1.15, boxShadow: "0 0 0 4px #31979533" } : { scale: 1, boxShadow: "none" }}
-                transition={{ type: "spring", stiffness: 300, damping: 20 }}>
-                <Button
-                  variant={activeSection === item ? "solid" : "ghost"}
-                  colorScheme="teal"
-                  size="md"
-                  fontWeight="bold"
-                  onClick={() => handleNavClick(item)}
-                >
-                  {item}
-                </Button>
-              </Box>
-            ))}
-          </Stack>
+          </Box>
+          <IconButton
+            aria-label="Toggle theme"
+            icon={colorMode === "light" ? <MoonIcon /> : <SunIcon />}
+            onClick={toggleColorMode}
+            colorScheme="teal"
+            size={{ base: "sm", md: "md" }}
+            boxShadow="md"
+            ml={2}
+            transition="all 0.2s"
+          />
+        </Stack>
+        <Stack direction={{ base: "column", md: "row" }} spacing={{ base: 1, md: 2 }} align="center" justify="center" mt={{ base: 1, md: 2 }} wrap="wrap">
+          {/* Second row: Goals, Worries, Gratitude, Spending */}
+          {navItems.slice(2).map(item => (
+            <Box as={motion.div} key={item}
+              animate={activeSection === item ? { scale: 1.15, boxShadow: "0 0 0 4px #31979533" } : { scale: 1, boxShadow: "none" }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}>
+              <Button
+                variant={activeSection === item ? "solid" : "ghost"}
+                colorScheme="teal"
+                size={{ base: "sm", md: "md" }}
+                fontWeight="bold"
+                onClick={() => handleNavClick(item)}
+              >
+                {item}
+              </Button>
+            </Box>
+          ))}
+        </Stack>
       </Box>
-      <Box p={8} display="flex" flexDirection="column" alignItems="center">
+      <Box p={{ base: 2, md: 8 }} display="flex" flexDirection="column" alignItems="center" w="100%">
         <ScaleFade in={activeSection === "Calendar"} initialScale={0.8} unmountOnExit transition={{ enter: { duration: 0.6 }, exit: { duration: 0.3 } }}>
           <Box>
             <Box mb={8}>
@@ -606,22 +608,22 @@ export default function Dashboard() {
           </Box>
         )}
         {/* Weather widget above Quotes */}
-        <Box mt={8} w="100%" maxW="md" textAlign="center">
-          <Box mb={4} p={4} bg={colorMode === "light" ? "blue.50" : "blue.900"} borderRadius="md" boxShadow="md">
-            <Heading size="sm" mb={2} color="blue.700">Weather in Stockholm, Sweden</Heading>
+        <Box mt={{ base: 4, md: 8 }} w="100%" maxW={{ base: "100%", md: "md" }} textAlign="center">
+          <Box mb={4} p={{ base: 2, md: 4 }} bg={colorMode === "light" ? "blue.50" : "blue.900"} borderRadius="md" boxShadow="md">
+            <Heading size={{ base: "xs", md: "sm" }} mb={2} color="blue.700">Weather in Stockholm, Sweden</Heading>
             {weatherLoading ? (
-              <Box>Loading weather...</Box>
+              <Box fontSize={{ base: "sm", md: "md" }}>Loading weather...</Box>
             ) : weather ? (
-              <Box>
+              <Box fontSize={{ base: "sm", md: "md" }}>
                 <b>{weather.temperature}°C</b> &nbsp;
                 <span>Wind: {weather.windspeed} km/h</span>
                 <Box fontSize="sm" color="gray.500" mt={1}>Updated just now</Box>
               </Box>
             ) : (
-              <Box color="red.500">Could not fetch weather.</Box>
+              <Box color="red.500" fontSize={{ base: "sm", md: "md" }}>Could not fetch weather.</Box>
             )}
           </Box>
-          <Box p={4} bg="yellow.100" borderRadius="md" mb={4}>{currentQuote}</Box>
+          <Box p={{ base: 2, md: 4 }} bg="yellow.100" borderRadius="md" mb={4} fontSize={{ base: "sm", md: "md" }}>{currentQuote}</Box>
         </Box>
       </Box>
     </Box>
