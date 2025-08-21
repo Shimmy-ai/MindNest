@@ -29,7 +29,7 @@ MindNest is a personal productivity dashboard built with React, Chakra UI, and F
 ### Frontend (React)
 1. Go to the frontend folder:
     ```bash
-    cd thinky-frontend
+    cd frontend
     ```
 2. Install dependencies:
     ```bash
