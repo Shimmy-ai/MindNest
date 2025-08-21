@@ -1,8 +1,10 @@
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import generate_password_hash, check_password_hash
 import json
 import os
+import re
 
 from gratitude import gratitude_bp
 from spending import spending_bp
@@ -34,6 +36,17 @@ class Worry(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     text = db.Column(db.String(200), nullable=False)
     resolved = db.Column(db.Boolean, default=False)
+
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(100), unique=True, nullable=False)
+    password_hash = db.Column(db.String(128), nullable=False)
+
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
 
 # Register blueprints
 app.register_blueprint(gratitude_bp)
@@ -139,11 +152,41 @@ def handle_worry(worry_id):
         db.session.commit()
         return jsonify({"id": worry.id, "text": worry.text, "resolved": worry.resolved})
 
-    if request.method == "DELETE":
-        db.session.delete(worry)
-        db.session.commit()
-        return jsonify({"message": "Worry deleted"})
 
+@app.route("/register", methods=["POST"])
+def register():
+    data = request.get_json()
+    username = data.get("username")
+    password = data.get("password")
+
+    if not username or not password:
+        return jsonify({"error": "Missing username or password"}), 400
+    if len(username) < 3 or len(username) > 30 or not re.match(r"^[A-Za-z0-9_]+$", username):
+        return jsonify({"error": "Username must be 3-30 characters and contain only letters, numbers, and underscores."}), 400
+    if len(password) < 8:
+        return jsonify({"error": "Password must be at least 8 characters long."}), 400
+    if not re.search(r"[A-Za-z]", password) or not re.search(r"[0-9]", password):
+        return jsonify({"error": "Password must contain both letters and numbers."}), 400
+
+    if User.query.filter_by(username=username).first():
+        return jsonify({"error": "Username already exists"}), 409
+
+    user = User(username=username)
+    user.set_password(password)  # Hash the password
+    db.session.add(user)
+    db.session.commit()
+    return jsonify({"id": user.id, "username": user.username}), 201
+
+
+@app.route("/login", methods=["POST"])
+def login():
+    data = request.get_json()
+    username = data.get("username")
+    password = data.get("password")
+    user = User.query.filter_by(username=username).first()
+    if user and user.check_password(password):
+        return jsonify({"success": True, "username": user.username})
+    return jsonify({"error": "Invalid credentials"}), 401
 
 # ----------------- Welcome Endpoint -----------------
 @app.route("/")

@@ -19,6 +19,9 @@ const initialQuotes = [
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import { Box, Flex, Heading, Spacer, Button, IconButton, useColorMode, Input, Stack, ScaleFade } from "@chakra-ui/react";
+import { Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@chakra-ui/react";
+import { useRef } from "react";
+import { AddIcon } from "@chakra-ui/icons";
 import { motion } from "framer-motion";
 import { SunIcon, MoonIcon } from "@chakra-ui/icons";
 // Weather API for Stockholm, Sweden
@@ -27,6 +30,65 @@ const WEATHER_API = "https://api.open-meteo.com/v1/forecast?latitude=59.3293&lon
 const navItems = ["Calendar", "Habits", "Goals", "Worries", "Gratitude", "Spending"];
 
 export default function Dashboard() {
+  // Login modal state
+  const loginDisclosure = useDisclosure();
+  const [loginUsername, setLoginUsername] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+  const [loginMsg, setLoginMsg] = useState("");
+  const initialRef = useRef();
+  const handleLogin = async () => {
+    if (!loginUsername || !loginPassword) {
+      setLoginMsg("Username and password required");
+      return;
+    }
+    try {
+      const res = await fetch("http://127.0.0.1:5000/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: loginUsername, password: loginPassword })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setLoginMsg("Login successful");
+        setLoginUsername("");
+        setLoginPassword("");
+        loginDisclosure.onClose();
+      } else {
+        setLoginMsg(data.error || "Login failed");
+      }
+    } catch {
+      setLoginMsg("Server error");
+    }
+  };
+    // User registration modal state
+    const { isOpen, onOpen, onClose } = useDisclosure();
+  // User registration state
+  const [newUsername, setNewUsername] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [userMsg, setUserMsg] = useState("");
+  const handleAddUser = async () => {
+    if (!newUsername || !newPassword) {
+      setUserMsg("Username and password required");
+      return;
+    }
+    try {
+      const res = await fetch("http://127.0.0.1:5000/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: newUsername, password: newPassword })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setUserMsg("User added: " + data.username);
+        setNewUsername("");
+        setNewPassword("");
+      } else {
+        setUserMsg(data.error || "Error adding user");
+      }
+    } catch {
+      setUserMsg("Server error");
+    }
+  };
   // Weather state
   const [weather, setWeather] = useState(null);
   const [weatherLoading, setWeatherLoading] = useState(true);
@@ -174,24 +236,92 @@ export default function Dashboard() {
 
   return (
     <Box minH="100vh" bg={colorMode === "light" ? "gray.50" : "gray.800"}>
+      {/* User Registration Modal Trigger Icon */}
+      <Box position="absolute" top={4} right={4} zIndex={2}>
+        <IconButton
+          aria-label="Add user"
+          icon={<AddIcon />}
+          onClick={onOpen}
+          colorScheme="teal"
+          size="md"
+          ml={2}
+          boxShadow="md"
+        />
+      </Box>
+      <Modal isOpen={isOpen} onClose={onClose} isCentered>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Add User</ModalHeader>
+          <ModalBody>
+            <Stack spacing={3}>
+              <Input placeholder="Username" value={newUsername} onChange={e => setNewUsername(e.target.value)} />
+              <Input placeholder="Password" type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} />
+              {userMsg && <Box color="red.500">{userMsg}</Box>}
+            </Stack>
+          </ModalBody>
+          <ModalFooter>
+            <Button colorScheme="teal" mr={3} onClick={handleAddUser}>Add User</Button>
+            <Button variant="ghost" onClick={onClose}>Close</Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
       <Box as="nav" p={4} bg={colorMode === "light" ? "white" : "gray.900"} boxShadow="md">
           <Stack direction={{ base: "column", md: "row" }} spacing={2} align="center" justify="center">
-            {/* Top row: Calendar, Habits, Theme toggle */}
-            {[0, 1].map(idx => (
-              <Box as={motion.div} key={navItems[idx]}
-                animate={activeSection === navItems[idx] ? { scale: 1.15, boxShadow: "0 0 0 4px #31979533" } : { scale: 1, boxShadow: "none" }}
-                transition={{ type: "spring", stiffness: 300, damping: 20 }}>
-                <Button
-                  variant={activeSection === navItems[idx] ? "solid" : "ghost"}
-                  colorScheme="teal"
-                  size="md"
-                  fontWeight="bold"
-                  onClick={() => handleNavClick(navItems[idx])}
-                >
-                  {navItems[idx]}
-                </Button>
-              </Box>
-            ))}
+            {/* Top row: Calendar, Habits, Add User, Theme toggle */}
+            <Box as={motion.div} key={navItems[0]}
+              animate={activeSection === navItems[0] ? { scale: 1.15, boxShadow: "0 0 0 4px #31979533" } : { scale: 1, boxShadow: "none" }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}>
+              <Button
+                variant={activeSection === navItems[0] ? "solid" : "ghost"}
+                colorScheme="teal"
+                size="md"
+                fontWeight="bold"
+                onClick={() => handleNavClick(navItems[0])}
+              >
+                {navItems[0]}
+              </Button>
+            </Box>
+            <Box as={motion.div} key={navItems[1]}
+              animate={activeSection === navItems[1] ? { scale: 1.15, boxShadow: "0 0 0 4px #31979533" } : { scale: 1, boxShadow: "none" }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}>
+              <Button
+                variant={activeSection === navItems[1] ? "solid" : "ghost"}
+                colorScheme="teal"
+                size="md"
+                fontWeight="bold"
+                onClick={() => handleNavClick(navItems[1])}
+              >
+                {navItems[1]}
+              </Button>
+            </Box>
+            <Button colorScheme="teal" variant="outline" size="md" ml={2} onClick={loginDisclosure.onOpen}>Login</Button>
+      <Modal isOpen={loginDisclosure.isOpen} onClose={loginDisclosure.onClose} initialFocusRef={initialRef} isCentered>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Login</ModalHeader>
+          <ModalBody pb={6}>
+            <Stack spacing={3}>
+              <Input ref={initialRef} placeholder="Username" value={loginUsername} onChange={e => setLoginUsername(e.target.value)} />
+              <Input placeholder="Password" type="password" value={loginPassword} onChange={e => setLoginPassword(e.target.value)} />
+              {loginMsg && <Box color="red.500">{loginMsg}</Box>}
+            </Stack>
+          </ModalBody>
+          <ModalFooter>
+            <Button colorScheme="teal" mr={3} onClick={handleLogin}>Login</Button>
+            <Button variant="ghost" onClick={loginDisclosure.onClose}>Cancel</Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+            {/* Add User Icon in between Habits and Theme toggle */}
+            <IconButton
+              aria-label="Add user"
+              icon={<AddIcon />}
+              onClick={onOpen}
+              colorScheme="teal"
+              size="md"
+              boxShadow="md"
+              ml={2}
+            />
             <IconButton
               aria-label="Toggle theme"
               icon={colorMode === "light" ? <MoonIcon /> : <SunIcon />}
