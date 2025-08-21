@@ -90,9 +90,6 @@ export default function Dashboard() {
     const interval = setInterval(fetchWeather, 600000);
     return () => clearInterval(interval);
   }, []);
-  // Remove unused showGratitudeInputs state
-  const { colorMode, toggleColorMode } = useColorMode();
-  const [activeSection, setActiveSection] = useState("Calendar");
   // UI state
   const { colorMode, toggleColorMode } = useColorMode();
   const [activeSection, setActiveSection] = useState("Calendar");
