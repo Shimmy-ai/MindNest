@@ -589,3 +589,9 @@ export default function Dashboard() {
     </Box>
   );
 }
+
+export default {
+  optimizeDeps: {
+    include: ['framer-motion']
+  }
+}
