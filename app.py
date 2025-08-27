@@ -23,19 +23,31 @@ class Habit(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     frequency = db.Column(db.String(50))
+    date = db.Column(db.String(10), nullable=False)  # Format: YYYY-MM-DD
 
 class Goal(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
     description = db.Column(db.String(200))
     deadline = db.Column(db.String(50))
+    date = db.Column(db.String(10), nullable=False)  # Format: YYYY-MM-DD
+
 
 class Worry(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     text = db.Column(db.String(200), nullable=False)
     resolved = db.Column(db.Boolean, default=False)
+    date = db.Column(db.String(10), nullable=False)  # Format: YYYY-MM-DD
+
+# Calendar Event Model
+class CalendarEvent(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    date = db.Column(db.String(10), nullable=False)  # Format: YYYY-MM-DD
+    title = db.Column(db.String(200), nullable=False)
+    description = db.Column(db.String(500))
 
 # Register blueprints
+
 app.register_blueprint(gratitude_bp)
 app.register_blueprint(spending_bp)
 
@@ -43,18 +55,37 @@ with app.app_context():
     db.create_all()
 
 # ----------------- CRUD for Habits -----------------
-@app.route("/habits", methods=["GET", "POST"])
+
+@app.route("/habits", methods=["GET", "POST", "DELETE"])
 def handle_habits():
     if request.method == "GET":
-        habits = Habit.query.all()
-        return jsonify([{"id": h.id, "name": h.name, "frequency": h.frequency} for h in habits])
+        date = request.args.get("date")
+        if date:
+            habits = Habit.query.filter_by(date=date).all()
+        else:
+            habits = Habit.query.all()
+        return jsonify([
+            {"id": h.id, "name": h.name, "frequency": h.frequency, "date": h.date}
+            for h in habits
+        ])
 
-    if request.method == "POST":
+    elif request.method == "POST":
         data = request.json
-        habit = Habit(name=data["name"], frequency=data.get("frequency"))
+        # Accept both 'name' and 'text' for compatibility
+        habit_name = data.get("name") or data.get("text")
+        habit = Habit(
+            name=habit_name,
+            frequency=data.get("frequency"),
+            date=data["date"]
+        )
         db.session.add(habit)
         db.session.commit()
-        return jsonify({"id": habit.id, "name": habit.name, "frequency": habit.frequency}), 201
+        return jsonify({"id": habit.id, "name": habit.name, "frequency": habit.frequency, "date": habit.date}), 201
+
+    elif request.method == "DELETE":
+        Habit.query.delete()
+        db.session.commit()
+        return jsonify({"message": "All habits deleted."})
 
 
 @app.route("/habits/<int:habit_id>", methods=["PUT", "DELETE"])
@@ -80,15 +111,27 @@ def handle_habit(habit_id):
 @app.route("/goals", methods=["GET", "POST"])
 def handle_goals():
     if request.method == "GET":
-        goals = Goal.query.all()
-        return jsonify([{"id": g.id, "title": g.title, "description": g.description, "deadline": g.deadline} for g in goals])
+        date = request.args.get("date")
+        if date:
+            goals = Goal.query.filter_by(date=date).all()
+        else:
+            goals = Goal.query.all()
+        return jsonify([
+            {"id": g.id, "title": g.title, "description": g.description, "deadline": g.deadline, "date": g.date}
+            for g in goals
+        ])
 
     if request.method == "POST":
         data = request.json
-        goal = Goal(title=data["title"], description=data.get("description"), deadline=data.get("deadline"))
+        goal = Goal(
+            title=data["title"],
+            description=data.get("description"),
+            deadline=data.get("deadline"),
+            date=data["date"]
+        )
         db.session.add(goal)
         db.session.commit()
-        return jsonify({"id": goal.id, "title": goal.title, "description": goal.description, "deadline": goal.deadline}), 201
+        return jsonify({"id": goal.id, "title": goal.title, "description": goal.description, "deadline": goal.deadline, "date": goal.date}), 201
 
 
 @app.route("/goals/<int:goal_id>", methods=["PUT", "DELETE"])
@@ -115,15 +158,26 @@ def handle_goal(goal_id):
 @app.route("/worries", methods=["GET", "POST"])
 def handle_worries():
     if request.method == "GET":
-        worries = Worry.query.all()
-        return jsonify([{"id": w.id, "text": w.text, "resolved": w.resolved} for w in worries])
+        date = request.args.get("date")
+        if date:
+            worries = Worry.query.filter_by(date=date).all()
+        else:
+            worries = Worry.query.all()
+        return jsonify([
+            {"id": w.id, "text": w.text, "resolved": w.resolved, "date": w.date}
+            for w in worries
+        ])
 
     if request.method == "POST":
         data = request.json
-        worry = Worry(text=data["text"], resolved=data.get("resolved", False))
+        worry = Worry(
+            text=data["text"],
+            resolved=data.get("resolved", False),
+            date=data["date"]
+        )
         db.session.add(worry)
         db.session.commit()
-        return jsonify({"id": worry.id, "text": worry.text, "resolved": worry.resolved}), 201
+        return jsonify({"id": worry.id, "text": worry.text, "resolved": worry.resolved, "date": worry.date}), 201
 
 
 @app.route("/worries/<int:worry_id>", methods=["PUT", "DELETE"])
@@ -145,12 +199,55 @@ def handle_worry(worry_id):
         return jsonify({"message": "Worry deleted"})
 
 
+
+# ----------------- CRUD for Calendar Events -----------------
+@app.route("/calendar", methods=["GET", "POST"])
+def handle_calendar():
+    if request.method == "GET":
+        date = request.args.get("date")
+        if date:
+            events = CalendarEvent.query.filter_by(date=date).all()
+        else:
+            events = CalendarEvent.query.all()
+        return jsonify([
+            {"id": e.id, "date": e.date, "title": e.title, "description": e.description}
+            for e in events
+        ])
+    if request.method == "POST":
+        data = request.json
+        event = CalendarEvent(
+            date=data["date"],
+            title=data["title"],
+            description=data.get("description", "")
+        )
+        db.session.add(event)
+        db.session.commit()
+        return jsonify({"id": event.id, "date": event.date, "title": event.title, "description": event.description}), 201
+
+@app.route("/calendar/<int:event_id>", methods=["PUT", "DELETE"])
+def handle_calendar_event(event_id):
+    event = CalendarEvent.query.get(event_id)
+    if not event:
+        return jsonify({"error": "Event not found"}), 404
+    if request.method == "PUT":
+        data = request.json
+        event.date = data.get("date", event.date)
+        event.title = data.get("title", event.title)
+        event.description = data.get("description", event.description)
+        db.session.commit()
+        return jsonify({"id": event.id, "date": event.date, "title": event.title, "description": event.description})
+    if request.method == "DELETE":
+        db.session.delete(event)
+        db.session.commit()
+        return jsonify({"message": "Event deleted"})
+
+
 # ----------------- Welcome Endpoint -----------------
 @app.route("/")
 def index():
     return jsonify({
         "message": "Welcome to MindNest API!",
-        "endpoints": ["/habits", "/goals", "/worries"]
+        "endpoints": ["/habits", "/goals", "/worries", "/calendar"]
     })
 
 

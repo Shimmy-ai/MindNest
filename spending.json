@@ -4,5 +4,23 @@
       "item": "c",
       "amount": 30
     }
+  ],
+  "2025-08-27": [
+    {
+      "item": "q",
+      "amount": 20
+    },
+    {
+      "item": "sda",
+      "amount": 50
+    },
+    {
+      "item": "asd",
+      "amount": 800
+    },
+    {
+      "item": "w",
+      "amount": 1000
+    }
   ]
 }
