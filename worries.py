@@ -7,17 +7,28 @@ WORRIES_FILE = 'worries.json'
 
 @worries_bp.route('/worries', methods=['GET'])
 def get_worries():
+    date = request.args.get('date')
     if not os.path.exists(WORRIES_FILE):
         return jsonify([])
     with open(WORRIES_FILE, 'r') as f:
         worries = json.load(f)
-    return jsonify(worries)
+    if date:
+        filtered = [w for w in worries if w.get('date') == date]
+        print(f"Worries for {date}: {filtered}")
+        return jsonify(filtered)
+    else:
+        print(f"All worries: {worries}")
+        return jsonify(worries)
 
 @worries_bp.route('/worries', methods=['POST'])
 def add_worry():
     data = request.get_json()
-    if not data:
-        return jsonify({'error': 'No data provided'}), 400
+    print(f"POST /worries received data: {data}")
+    date = data.get('date')
+    name = data.get('name')
+    if not data or not date or not name or not isinstance(name, str) or not name.strip():
+        print(f"POST /worries error: No data provided, missing date, or empty name. Data: {data}")
+        return jsonify({'error': 'No data provided, missing date, or empty name'}), 400
     if not os.path.exists(WORRIES_FILE):
         worries = []
     else:
@@ -27,9 +38,13 @@ def add_worry():
         'id': len(worries) + 1,
         'name': data.get('name'),
         'description': data.get('description', ''),
-        'resolved': False
+        'resolved': False,
+        'date': date
     }
     worries.append(new_worry)
     with open(WORRIES_FILE, 'w') as f:
         json.dump(worries, f)
-    return jsonify(new_worry), 201
+    # Return all worries for this date after adding
+    filtered = [w for w in worries if w.get('date') == date]
+    print(f"POST /worries: Returning worries for {date}: {filtered}")
+    return jsonify(filtered)

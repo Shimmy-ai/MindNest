@@ -7,20 +7,12 @@
   ],
   "2025-08-27": [
     {
-      "item": "q",
-      "amount": 20
+      "item": "sw",
+      "amount": 25
     },
     {
-      "item": "sda",
-      "amount": 50
-    },
-    {
-      "item": "asd",
-      "amount": 800
-    },
-    {
-      "item": "w",
-      "amount": 1000
+      "item": "sa",
+      "amount": 979
     }
   ]
 }

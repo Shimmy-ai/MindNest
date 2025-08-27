@@ -19,7 +19,6 @@ class Goal(db.Model):
     title = db.Column(db.String(150), nullable=False)
     deadline = db.Column(db.DateTime, nullable=True)
     completed = db.Column(db.Boolean, default=False)
-    date = db.Column(db.String(10), nullable=False)  # Format: YYYY-MM-DD
 
     def __repr__(self):
         return f"<Goal {self.title}>"
@@ -29,7 +28,6 @@ class Worry(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     description = db.Column(db.String(200), nullable=False)
     date_added = db.Column(db.DateTime, default=datetime.utcnow)
-    date = db.Column(db.String(10), nullable=False)  # Format: YYYY-MM-DD
 
     def __repr__(self):
         return f"<Worry {self.description}>"

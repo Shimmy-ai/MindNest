@@ -46,11 +46,29 @@ export default function Dashboard() {
     const interval = setInterval(fetchWeather, 600000); // update every 10 min
     return () => clearInterval(interval);
   }, []);
+  // Add state for showing gratitude inputs
+  const [showGratitudeInputs, setShowGratitudeInputs] = useState(false);
   const { colorMode, toggleColorMode } = useColorMode();
   const [activeSection, setActiveSection] = useState("Calendar");
+  // Reset showGratitudeInputs when switching sections
+  useEffect(() => {
+    setShowGratitudeInputs(false);
+  }, [activeSection]);
   const [inputValue, setInputValue] = useState("");
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [events, setEvents] = useState({}); // { 'YYYY-MM-DD': [{id, title, description}] }
+  const [events, setEvents] = useState({}); // { 'YYYY-MM-DD': [event1, event2] }
+  // Fetch events for selected date
+  useEffect(() => {
+    const dateKey = selectedDate.toISOString().split('T')[0];
+    fetch(`http://127.0.0.1:5000/events?date=${dateKey}`)
+      .then(res => res.json())
+      .then(data => {
+        setEvents(prev => ({ ...prev, [dateKey]: Array.isArray(data) ? data : [] }));
+      })
+      .catch(() => {
+        setEvents(prev => ({ ...prev, [dateKey]: [] }));
+      });
+  }, [selectedDate]);
   const [quotes, setQuotes] = useState(initialQuotes);
   const [quoteInput, setQuoteInput] = useState("");
   const [currentQuote, setCurrentQuote] = useState("");
@@ -94,67 +112,43 @@ export default function Dashboard() {
     setSelectedDate(date);
   };
 
-  // Fetch events for selected date from backend
-  useEffect(() => {
-    const dateKey = selectedDate.toISOString().split('T')[0];
-    fetch(`http://127.0.0.1:5000/calendar?date=${dateKey}`)
-      .then(res => res.json())
-      .then(data => {
-        setEvents(prev => ({ ...prev, [dateKey]: data }));
-      })
-      .catch(() => {
-        setEvents(prev => ({ ...prev, [dateKey]: [] }));
-      });
-  }, [selectedDate]);
-
   const [habits, setHabits] = useState([]);
-  // Load habits for selected date from backend
+  // Fetch habits for selected date
   useEffect(() => {
     const dateKey = selectedDate.toISOString().split('T')[0];
     fetch(`http://127.0.0.1:5000/habits?date=${dateKey}`)
       .then(res => res.json())
-      .then(data => setHabits(data))
+      .then(data => setHabits(Array.isArray(data) ? data : []))
       .catch(() => setHabits([]));
   }, [selectedDate]);
   const [gratitude, setGratitude] = useState([]);
   const [gratitudeInput, setGratitudeInput] = useState("");
-  const [showConfirm, setShowConfirm] = useState(false);
-  const [worries, setWorries] = useState([]);
-  const [goals, setGoals] = useState([]);
-  // Load goals for selected date from backend
-  useEffect(() => {
-    const dateKey = selectedDate.toISOString().split('T')[0];
-    fetch(`http://127.0.0.1:5000/goals?date=${dateKey}`)
-      .then(res => res.json())
-      .then(data => setGoals(data))
-      .catch(() => setGoals([]));
-  }, [selectedDate]);
-
-  // Load worries for selected date from backend
-  useEffect(() => {
-    const dateKey = selectedDate.toISOString().split('T')[0];
-    fetch(`http://127.0.0.1:5000/worries?date=${dateKey}`)
-      .then(res => res.json())
-      .then(data => setWorries(data))
-      .catch(() => setWorries([]));
-  }, [selectedDate]);
-
-  // Load gratitude for selected date from backend
   useEffect(() => {
     const dateKey = selectedDate.toISOString().split('T')[0];
     fetch(`http://127.0.0.1:5000/gratitude?date=${dateKey}`)
       .then(res => res.json())
-      .then(data => {
-        // API returns all entries, filter for selected date
-        if (data && data[dateKey]) {
-          setGratitude(data[dateKey]);
-        } else {
-          setGratitude([]);
-        }
-      })
+      .then(data => setGratitude(Array.isArray(data) ? data.map((entry, i) => ({ ...entry, display: `${dateKey}.${i+1}` })) : []))
       .catch(() => setGratitude([]));
   }, [selectedDate]);
-
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [worries, setWorries] = useState([]);
+  useEffect(() => {
+    const dateKey = selectedDate.toISOString().split('T')[0];
+    fetch(`http://127.0.0.1:5000/worries?date=${dateKey}`)
+      .then(res => res.json())
+      .then(data => setWorries(Array.isArray(data) ? data : []))
+      .catch(() => setWorries([]));
+  }, [selectedDate]);
+  const [goals, setGoals] = useState([]);
+  useEffect(() => {
+    if (activeSection === "Goals") {
+      const dateKey = selectedDate.toISOString().split('T')[0];
+      fetch(`http://127.0.0.1:5000/goals?date=${dateKey}`)
+        .then(res => res.json())
+        .then(data => setGoals(Array.isArray(data) ? data : []))
+        .catch(() => setGoals([]));
+    }
+  }, [activeSection, selectedDate]);
   // Add state for spending
   const [spending, setSpending] = useState({});
   const [spendingInput, setSpendingInput] = useState("");
@@ -172,85 +166,49 @@ export default function Dashboard() {
         setSpending(prev => ({ ...prev, [dateKey]: [] }));
       });
   }, [selectedDate]);
-  const handleAdd = async () => {
+  const handleAdd = () => {
     if (activeSection === "Calendar") {
       if (!inputValue) return;
       const dateKey = selectedDate.toISOString().split('T')[0];
-      // Save event to backend
-      try {
-        const res = await fetch('http://127.0.0.1:5000/calendar', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ date: dateKey, title: inputValue, description: "" })
+      fetch('http://127.0.0.1:5000/events', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: inputValue, date: dateKey })
+      })
+        .then(res => res.json())
+        .then(data => {
+          setEvents(prev => ({ ...prev, [dateKey]: Array.isArray(data) ? data : [] }));
+          setInputValue("");
+        })
+        .catch(() => {
+          setEvents(prev => ({
+            ...prev,
+            [dateKey]: prev[dateKey] ? [...prev[dateKey], { text: inputValue, date: dateKey }] : [{ text: inputValue, date: dateKey }]
+          }));
+          setInputValue("");
         });
-        const event = await res.json();
-        setEvents(prev => ({
-          ...prev,
-          [dateKey]: prev[dateKey] ? [...prev[dateKey], event] : [event]
-        }));
-        setInputValue("");
-      } catch {
-        // fallback: local only
-        setEvents(prev => ({
-          ...prev,
-          [dateKey]: prev[dateKey] ? [...prev[dateKey], { title: inputValue, description: "" }] : [{ title: inputValue, description: "" }]
-        }));
-        setInputValue("");
-      }
     } else if (activeSection === "Habits") {
       if (!inputValue) return;
-      const dateKey = selectedDate.toISOString().split('T')[0];
       // POST new habit to backend with date
+      const dateKey = selectedDate.toISOString().split('T')[0];
       fetch('http://127.0.0.1:5000/habits', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: inputValue, frequency: '', date: dateKey })
+        body: JSON.stringify({ habit: inputValue, date: dateKey })
       })
         .then(res => res.json())
         .then(data => {
-          setHabits(prev => [...prev, data]);
+          setHabits(Array.isArray(data) ? data : []);
           setInputValue("");
         })
         .catch(() => {
-          setHabits(prev => [...prev, { name: inputValue, frequency: '', date: dateKey }]);
-          setInputValue("");
-        });
-    } else if (activeSection === "Goals") {
-      if (!inputValue) return;
-      const dateKey = selectedDate.toISOString().split('T')[0];
-      // POST new goal to backend with date
-      fetch('http://127.0.0.1:5000/goals', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: inputValue, description: '', deadline: '', date: dateKey })
-      })
-        .then(res => res.json())
-        .then(data => {
-          setGoals(prev => [...prev, data]);
-          setInputValue("");
-        })
-        .catch(() => {
-          setGoals(prev => [...prev, { title: inputValue, description: '', deadline: '', date: dateKey }]);
+          setHabits(prev => [...prev, { text: inputValue, date: dateKey }]);
           setInputValue("");
         });
     } else if (activeSection === "Gratitude") {
-      if (!gratitudeInput.trim()) return;
-      const dateKey = selectedDate.toISOString().split('T')[0];
-      // POST new gratitude entry to backend with date
-      fetch('http://127.0.0.1:5000/gratitude', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ date: dateKey, entries: [gratitudeInput.trim()] })
-      })
-        .then(res => res.json())
-        .then(data => {
-          setGratitude(data);
-          setGratitudeInput("");
-        })
-        .catch(() => {
-          setGratitude(prev => [...prev, { text: gratitudeInput.trim() }]);
-          setGratitudeInput("");
-        });
+      if (!inputValue) return;
+      setGratitude(prev => [...prev, inputValue]);
+      setInputValue("");
     } else {
       if (!inputValue) return;
       // For Goals, Worries, Quotes, just alert for now
@@ -348,41 +306,44 @@ export default function Dashboard() {
                   value={inputValue}
                   onChange={e => setInputValue(e.target.value)}
                 />
-                <Button colorScheme="teal" onClick={async () => {
+                <Button colorScheme="teal" onClick={() => {
                   if (!inputValue) return;
-                  // POST new habit to backend with date
-                  try {
-                    const res = await fetch('http://127.0.0.1:5000/habits', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ name: inputValue, frequency: '', date: dateKey })
+                  fetch('http://127.0.0.1:5000/habits', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ habit: inputValue, date: dateKey })
+                  })
+                    .then(res => res.json())
+                    .then(data => {
+                      setHabits(Array.isArray(data) ? data : []);
+                      setInputValue("");
+                      setShowConfirm(true);
+                      setTimeout(() => setShowConfirm(false), 2000);
+                    })
+                    .catch(() => {
+                      setHabits(prev => [...prev, { text: inputValue, date: dateKey }]);
+                      setInputValue("");
+                      setShowConfirm(true);
+                      setTimeout(() => setShowConfirm(false), 2000);
                     });
-                    const data = await res.json();
-                    setHabits(prev => [...prev, data]);
-                  } catch {
-                    setHabits(prev => [...prev, { name: inputValue, frequency: '', date: dateKey }]);
-                  }
-                  setInputValue("");
-                  setShowConfirm(true);
-                  setTimeout(() => setShowConfirm(false), 2000);
                 }}>
                   Add
                 </Button>
                 {showConfirm && (
                   <Box color="green.600" fontWeight="bold" mt={2}>Habit added!</Box>
                 )}
-                {habits.length > 0 && (
-                  <Box w="100%" mt={4}>
-                    <Heading size="sm" mb={2}>Your Habits List for Today:</Heading>
-                    <Stack>
-                      {habits.map((habit, idx) => (
-                        <Box key={habit.id || idx} p={2} bg="gray.200" color="black" fontWeight="bold" borderRadius="md">
-                          {habit.name ? habit.name : (habit.text ? habit.text : JSON.stringify(habit))}
-                        </Box>
-                      ))}
-                    </Stack>
-                  </Box>
-                )}
+                <Box w="100%" mt={4}>
+                  <Heading size="sm" mb={2}>Your Habits List for Today:</Heading>
+                  <Stack>
+                    {habits.filter(habit => habit.date === dateKey).length === 0 ? (
+                      <Box p={2} color="gray.500">No habits for this day.</Box>
+                    ) : (
+                      habits.filter(habit => habit.date === dateKey).map((habit, idx) => (
+                        <Box key={idx} p={2} bg="red.100" borderRadius="md">{habit.text || habit.name}</Box>
+                      ))
+                    )}
+                  </Stack>
+                </Box>
               </Stack>
             );
           })()}
@@ -423,9 +384,9 @@ export default function Dashboard() {
                   <Box w="100%" mt={4}>
                     <Heading size="sm" mb={2}>Your Gratitude List for Today:</Heading>
                     <Stack>
-                      {gratitude.map((item, idx) => (
+                      {gratitude.filter(item => item.display.startsWith(dateKey)).map((item, idx) => (
                         <Box key={idx} p={2} bg="green.100" borderRadius="md">
-                          <b>{item.label ? item.label : idx + 1}:</b> {item.text}
+                          <b>{item.display}:</b> {item.text}
                         </Box>
                       ))}
                     </Stack>
@@ -446,22 +407,36 @@ export default function Dashboard() {
                   value={inputValue}
                   onChange={e => setInputValue(e.target.value)}
                 />
-                <Button colorScheme="teal" onClick={handleAdd}>
+                <Button colorScheme="teal" onClick={async () => {
+                  if (!inputValue) return;
+                  const res = await fetch('http://127.0.0.1:5000/goals', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title: inputValue, deadline: dateKey })
+                  });
+                  const data = await res.json();
+                  setGoals(Array.isArray(data) ? data : []);
+                  setInputValue("");
+                  setShowConfirm(true);
+                  setTimeout(() => setShowConfirm(false), 2000);
+                }}>
                   Add
                 </Button>
                 {showConfirm && (
                   <Box color="green.600" fontWeight="bold" mt={2}>Goal added!</Box>
                 )}
-                {goals.length > 0 && (
-                  <Box w="100%" mt={4}>
-                    <Heading size="sm" mb={2}>Your Goals List for Today:</Heading>
-                    <Stack>
-                      {goals.filter(goal => goal.date === dateKey).map((goal, idx) => (
-                        <Box key={goal.id || idx} p={2} bg="blue.100" borderRadius="md">{goal.title}</Box>
-                      ))}
-                    </Stack>
-                  </Box>
-                )}
+                <Box w="100%" mt={4}>
+                  <Heading size="sm" mb={2}>Your Goals List for Today:</Heading>
+                  <Stack>
+                    {goals.filter(goal => goal.deadline === dateKey).length === 0 ? (
+                      <Box p={2} color="gray.500">No goals for this day.</Box>
+                    ) : (
+                      goals.filter(goal => goal.deadline === dateKey).map((goal, idx) => (
+                        <Box key={idx} p={2} bg="blue.100" borderRadius="md">{goal.title}</Box>
+                      ))
+                    )}
+                  </Stack>
+                </Box>
               </Stack>
             );
           })()}
@@ -477,22 +452,43 @@ export default function Dashboard() {
                   value={inputValue}
                   onChange={e => setInputValue(e.target.value)}
                 />
-                <Button colorScheme="teal" onClick={handleAdd}>
+                <Button colorScheme="teal" onClick={() => {
+                  if (!inputValue) return;
+                  fetch('http://127.0.0.1:5000/worries', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: inputValue.trim(), date: dateKey })
+                  })
+                    .then(res => res.json())
+                    .then(data => {
+                      setWorries(Array.isArray(data) ? data : []);
+                      setInputValue("");
+                      setShowConfirm(true);
+                      setTimeout(() => setShowConfirm(false), 2000);
+                    })
+                    .catch(() => {
+                      setInputValue("");
+                      setShowConfirm(true);
+                      setTimeout(() => setShowConfirm(false), 2000);
+                    });
+                }}>
                   Add
                 </Button>
                 {showConfirm && (
                   <Box color="green.600" fontWeight="bold" mt={2}>Worry added!</Box>
                 )}
-                {worries.length > 0 && (
-                  <Box w="100%" mt={4}>
-                    <Heading size="sm" mb={2}>Your Worries List for Today:</Heading>
-                    <Stack>
-                      {worries.filter(worry => worry.date === dateKey).map((worry, idx) => (
-                        <Box key={worry.id || idx} p={2} bg="orange.100" borderRadius="md">{worry.text}</Box>
-                      ))}
-                    </Stack>
-                  </Box>
-                )}
+                <Box w="100%" mt={4}>
+                  <Heading size="sm" mb={2}>Your Worries List for Today:</Heading>
+                  <Stack>
+                    {worries.filter(worry => worry.date === dateKey).length === 0 ? (
+                      <Box p={2} color="gray.500">No worries for this day.</Box>
+                    ) : (
+                      worries.filter(worry => worry.date === dateKey).map((worry, idx) => (
+                        <Box key={idx} p={2} bg="orange.100" borderRadius="md">{worry.name}</Box>
+                      ))
+                    )}
+                  </Stack>
+                </Box>
               </Stack>
             );
           })()}
@@ -545,10 +541,10 @@ export default function Dashboard() {
                     <Heading size="sm" mb={2}>Your Spending for Today:</Heading>
                     <Stack>
                       {spending[dateKey].map((entry, idx) => (
-                        <Box key={idx} p={2} bg="purple.100" borderRadius="md">{entry.item}: {Number(entry.amount).toFixed(2)} SEK</Box>
+                        <Box key={idx} p={2} bg="purple.100" borderRadius="md">{entry.item}: {entry.amount.toFixed(2)} SEK</Box>
                       ))}
                     </Stack>
-                    <Box mt={2} fontWeight="bold">Total: {spending[dateKey].reduce((a, b) => a + Number(b.amount), 0).toFixed(2)} SEK</Box>
+                    <Box mt={2} fontWeight="bold">Total: {spending[dateKey].reduce((a, b) => a + b.amount, 0).toFixed(2)} SEK</Box>
                   </Box>
                 )}
               </Stack>
@@ -560,9 +556,8 @@ export default function Dashboard() {
             <Heading size="md" mb={2}>Events for Today:</Heading>
             <Stack>
               {events[selectedDate.toISOString().split('T')[0]].map((event, idx) => (
-                <Box key={event.id || idx} p={2} bg="teal.100" borderRadius="md">
-                  <b>{event.title}</b>
-                  {event.description && <span>: {event.description}</span>}
+                <Box key={idx} p={2} bg="teal.100" borderRadius="md">
+                  {event.text}
                 </Box>
               ))}
             </Stack>

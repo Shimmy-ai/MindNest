@@ -22,7 +22,15 @@ def write_gratitude(entries):
 
 @gratitude_bp.route('/gratitude', methods=['GET'])
 def get_gratitude():
-    return jsonify(read_gratitude())
+    date = request.args.get('date')
+    all_entries = read_gratitude()
+    if date:
+        entries = all_entries.get(date, [])
+        print(f"Gratitude for {date}: {entries}")
+        return jsonify(entries)
+    else:
+        print(f"All gratitude entries: {all_entries}")
+        return jsonify(all_entries)
 
 @gratitude_bp.route('/gratitude', methods=['POST'])
 def add_gratitude():
