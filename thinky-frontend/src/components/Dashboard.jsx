@@ -21,14 +21,15 @@ import 'react-calendar/dist/Calendar.css';
 import { Box, Flex, Heading, Spacer, Button, IconButton, useColorMode, Input, Stack, ScaleFade } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 import { SunIcon, MoonIcon } from "@chakra-ui/icons";
-// Weather API for Stockholm, Sweden
-const WEATHER_API = "https://api.open-meteo.com/v1/forecast?latitude=59.3293&longitude=18.0686&current_weather=true";
+// Weather API for Stockholm, Sweden (next 6 hours, with rain, snow, real feel)
+const WEATHER_API = "https://api.open-meteo.com/v1/forecast?latitude=59.3293&longitude=18.0686&hourly=temperature_2m,apparent_temperature,windspeed_10m,precipitation,snowfall&current_weather=true";
 
 const navItems = ["Calendar", "Habits", "Goals", "Worries", "Gratitude", "Spending"];
 
 export default function Dashboard() {
   // Weather state
   const [weather, setWeather] = useState(null);
+  const [weatherHourly, setWeatherHourly] = useState([]);
   const [weatherLoading, setWeatherLoading] = useState(true);
   useEffect(() => {
     async function fetchWeather() {
@@ -37,8 +38,26 @@ export default function Dashboard() {
         const res = await fetch(WEATHER_API);
         const data = await res.json();
         setWeather(data.current_weather);
+        // Get next 6 hours
+        const now = new Date();
+        const hours = data.hourly.time.map(t => new Date(t));
+        const nextHours = [];
+        for (let i = 0; i < hours.length; i++) {
+          if (hours[i] > now && nextHours.length < 6) {
+            nextHours.push({
+              time: hours[i],
+              temp: data.hourly.temperature_2m[i],
+              realFeel: data.hourly.apparent_temperature[i],
+              wind: data.hourly.windspeed_10m[i],
+              rain: data.hourly.precipitation[i],
+              snow: data.hourly.snowfall[i]
+            });
+          }
+        }
+        setWeatherHourly(nextHours);
       } catch {
         setWeather(null);
+        setWeatherHourly([]);
       }
       setWeatherLoading(false);
     }
@@ -386,7 +405,7 @@ export default function Dashboard() {
                     <Stack>
                       {gratitude.filter(item => item.display.startsWith(dateKey)).map((item, idx) => (
                         <Box key={idx} p={2} bg="green.100" borderRadius="md">
-                          <b>{item.display}:</b> {item.text}
+                          {item.text}
                         </Box>
                       ))}
                     </Stack>
@@ -484,7 +503,7 @@ export default function Dashboard() {
                       <Box p={2} color="gray.500">No worries for this day.</Box>
                     ) : (
                       worries.filter(worry => worry.date === dateKey).map((worry, idx) => (
-                        <Box key={idx} p={2} bg="orange.100" borderRadius="md">{worry.name}</Box>
+                        <Box key={idx} p={2} bg="teal.100" borderRadius="md">{worry.name}</Box>
                       ))
                     )}
                   </Stack>
@@ -510,7 +529,7 @@ export default function Dashboard() {
                   onChange={e => setSpendingInput(e.target.value)}
                   type="number"
                 />
-                <Button colorScheme="purple" onClick={async () => {
+                <Button colorScheme="teal" onClick={async () => {
                   if (!spendingInput || !spendingItem) return;
                   const res = await fetch('http://127.0.0.1:5000/spending', {
                     method: 'POST',
@@ -563,24 +582,60 @@ export default function Dashboard() {
             </Stack>
           </Box>
         )}
-        {/* Weather widget above Quotes */}
-        <Box mt={8} w="100%" maxW="md" textAlign="center">
-          <Box mb={4} p={4} bg={colorMode === "light" ? "blue.50" : "blue.900"} borderRadius="md" boxShadow="md">
-            <Heading size="sm" mb={2} color="blue.700">Weather in Stockholm, Sweden</Heading>
-            {weatherLoading ? (
-              <Box>Loading weather...</Box>
-            ) : weather ? (
-              <Box>
-                <b>{weather.temperature}°C</b> &nbsp;
-                <span>Wind: {weather.windspeed} km/h</span>
-                <Box fontSize="sm" color="gray.500" mt={1}>Updated just now</Box>
-              </Box>
-            ) : (
-              <Box color="red.500">Could not fetch weather.</Box>
-            )}
+        {/* Weather widget only in Calendar tab */}
+        {activeSection === "Calendar" && (
+          <Box mt={8} w="100%" maxW="md" textAlign="center">
+            <Box mb={4} p={4} bg={colorMode === "light" ? "blue.50" : "blue.900"} borderRadius="md" boxShadow="md">
+              <Heading size="sm" mb={2} color="blue.700">Weather in Stockholm, Sweden</Heading>
+              {weatherLoading ? (
+                <Box>Loading weather...</Box>
+              ) : weather ? (
+                <Box>
+                  <b>Now: {weather.temperature}°C</b> &nbsp;
+                  <span>Real feel: {
+                    typeof weather.apparent_temperature !== 'undefined' && weather.apparent_temperature !== null
+                      ? weather.apparent_temperature
+                      : (weatherHourly[0] && typeof weatherHourly[0].realFeel !== 'undefined' ? weatherHourly[0].realFeel : '-')
+                  }°C</span> &nbsp;
+                  <span>Wind: {weather.windspeed} km/h</span>
+                  <Box fontSize="sm" color="gray.500" mt={1}>Updated just now</Box>
+                  <Box mt={3}>
+                    <Heading size="xs" mb={1}>Next 6 hours:</Heading>
+                    <Stack spacing={2}>
+                      <Stack direction="row" spacing={2} justify="center">
+                        {weatherHourly.slice(0,3).map((h, idx) => (
+                          <Box key={idx} p={2} bg="blue.100" borderRadius="md" minW="100px">
+                            <b>{h.time.getHours()}:00</b><br/>
+                            {h.temp}°C<br/>
+                            <span style={{fontSize:'0.9em'}}>Real feel: {h.realFeel}°C</span><br/>
+                            <span style={{fontSize:'0.9em'}}>Wind: {h.wind} km/h</span><br/>
+                            <span style={{fontSize:'0.9em'}}>Rain: {h.rain} mm</span><br/>
+                            <span style={{fontSize:'0.9em'}}>Snow: {h.snow} mm</span>
+                          </Box>
+                        ))}
+                      </Stack>
+                      <Stack direction="row" spacing={2} justify="center">
+                        {weatherHourly.slice(3,6).map((h, idx) => (
+                          <Box key={idx} p={2} bg="blue.100" borderRadius="md" minW="100px">
+                            <b>{h.time.getHours()}:00</b><br/>
+                            {h.temp}°C<br/>
+                            <span style={{fontSize:'0.9em'}}>Real feel: {h.realFeel}°C</span><br/>
+                            <span style={{fontSize:'0.9em'}}>Wind: {h.wind} km/h</span><br/>
+                            <span style={{fontSize:'0.9em'}}>Rain: {h.rain} mm</span><br/>
+                            <span style={{fontSize:'0.9em'}}>Snow: {h.snow} mm</span>
+                          </Box>
+                        ))}
+                      </Stack>
+                    </Stack>
+                  </Box>
+                </Box>
+              ) : (
+                <Box color="red.500">Could not fetch weather.</Box>
+              )}
+            </Box>
+            <Box p={4} bg="yellow.100" borderRadius="md" mb={4}>{currentQuote}</Box>
           </Box>
-          <Box p={4} bg="yellow.100" borderRadius="md" mb={4}>{currentQuote}</Box>
-        </Box>
+        )}
       </Box>
     </Box>
   );
