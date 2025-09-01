@@ -7,7 +7,7 @@ from datetime import datetime
 
 app = Flask(__name__)
 gratitude_bp = Blueprint('gratitude', __name__)
-DATA_FILE = "gratitude.json"
+DATA_FILE = "/tmp/gratitude.json"
 
 def read_gratitude():
     if not os.path.exists(DATA_FILE):

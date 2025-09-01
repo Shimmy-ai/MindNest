@@ -6,7 +6,7 @@ WORRIES_FILE = os.path.join(DATA_DIR, "worries.json")
 import os
 
 worries_bp = Blueprint('worries', __name__)
-WORRIES_FILE = "worries.json"
+WORRIES_FILE = "/tmp/worries.json"
 if not os.path.exists(WORRIES_FILE):
     with open(WORRIES_FILE, 'w') as f:
         json.dump([], f)

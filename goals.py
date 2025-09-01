@@ -4,7 +4,7 @@ from flask import Blueprint, request, jsonify
 import json
 GOALS_FILE = os.path.join(DATA_DIR, "goals.json")
 
-GOALS_FILE = "goals.json"
+GOALS_FILE = "/tmp/goals.json"
 
 goals_bp = Blueprint('goals', __name__)
 
