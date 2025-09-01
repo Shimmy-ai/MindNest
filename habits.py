@@ -1,21 +1,20 @@
 from flask import Flask, request, jsonify
 import json
 import os
+DATA_DIR = os.environ.get("DATA_DIR", "/data")
+os.makedirs(DATA_DIR, exist_ok=True)
+HABITS_FILE = os.path.join(DATA_DIR, "habits.json")
 
 app = Flask(__name__)
-
-# File for persistence
-DATA_DIR = os.environ.get("DATA_DIR", "/data")
-HABITS_FILE = os.path.join(DATA_DIR, "habits.json")
 
 
 # Load habits from file
 def load_habits():
-    if os.path.exists(HABITS_FILE):
-        with open(HABITS_FILE, "r") as f:
-            habits = json.load(f)
-            print(f"Loaded habits from file: {habits}")
-            return habits
+  if os.path.exists(HABITS_FILE):
+    with open(HABITS_FILE, "r") as f:
+      habits = json.load(f)
+      print(f"Loaded habits from file: {habits}")
+      return habits
   with open(HABITS_FILE, "w") as f:
     json.dump([], f)
   print("No habits file found, starting with empty list.")
@@ -40,8 +39,8 @@ def get_habits():
 
 @app.route("/habits", methods=["POST"])
 def add_habit():
-    global next_id, habits
-    data = request.get_json()
+  global next_id, habits
+  data = request.get_json()
   habit = {
     "id": next_id,
     "text": data.get("habit"),
@@ -58,29 +57,3 @@ def add_habit():
   filtered = [h for h in habits if h.get("date") == date_val]
   return jsonify(filtered), 201
 
-if __name__ == "__main__":
-    app.run(debug=True)
-
-<Button colorScheme="teal" onClick={() => {
-  if (!inputValue) return;
-  fetch('http://127.0.0.1:5000/habits', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ habit: inputValue, date: dateKey })
-  })
-    .then(res => res.json())
-    .then(data => {
-      setHabits(Array.isArray(data) ? data : []);
-      setInputValue("");
-      setShowConfirm(true);
-      setTimeout(() => setShowConfirm(false), 2000);
-    })
-    .catch(() => {
-      setHabits(prev => [...prev, { text: inputValue, date: dateKey }]);
-      setInputValue("");
-      setShowConfirm(true);
-      setTimeout(() => setShowConfirm(false), 2000);
-    });
-}}>
-  Add
-</Button>
