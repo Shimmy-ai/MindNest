@@ -79,7 +79,7 @@ export default function Dashboard() {
   // Fetch events for selected date
   useEffect(() => {
     const dateKey = selectedDate.toISOString().split('T')[0];
-    fetch(`http://127.0.0.1:5000/events?date=${dateKey}`)
+  fetch(`https://mindnest-q3ss.onrender.com/events?date=${dateKey}`)
       .then(res => res.json())
       .then(data => {
         setEvents(prev => ({ ...prev, [dateKey]: Array.isArray(data) ? data : [] }));
@@ -135,7 +135,7 @@ export default function Dashboard() {
   // Fetch habits for selected date
   useEffect(() => {
     const dateKey = selectedDate.toISOString().split('T')[0];
-    fetch(`http://127.0.0.1:5000/habits?date=${dateKey}`)
+  fetch(`https://mindnest-q3ss.onrender.com/habits?date=${dateKey}`)
       .then(res => res.json())
       .then(data => setHabits(Array.isArray(data) ? data : []))
       .catch(() => setHabits([]));
@@ -144,7 +144,7 @@ export default function Dashboard() {
   const [gratitudeInput, setGratitudeInput] = useState("");
   useEffect(() => {
     const dateKey = selectedDate.toISOString().split('T')[0];
-    fetch(`http://127.0.0.1:5000/gratitude?date=${dateKey}`)
+  fetch(`https://mindnest-q3ss.onrender.com/gratitude?date=${dateKey}`)
       .then(res => res.json())
       .then(data => setGratitude(Array.isArray(data) ? data.map((entry, i) => ({ ...entry, display: `${dateKey}.${i+1}` })) : []))
       .catch(() => setGratitude([]));
@@ -153,7 +153,7 @@ export default function Dashboard() {
   const [worries, setWorries] = useState([]);
   useEffect(() => {
     const dateKey = selectedDate.toISOString().split('T')[0];
-    fetch(`http://127.0.0.1:5000/worries?date=${dateKey}`)
+  fetch(`https://mindnest-q3ss.onrender.com/worries?date=${dateKey}`)
       .then(res => res.json())
       .then(data => setWorries(Array.isArray(data) ? data : []))
       .catch(() => setWorries([]));
@@ -162,7 +162,7 @@ export default function Dashboard() {
   useEffect(() => {
     if (activeSection === "Goals") {
       const dateKey = selectedDate.toISOString().split('T')[0];
-      fetch(`http://127.0.0.1:5000/goals?date=${dateKey}`)
+  fetch(`https://mindnest-q3ss.onrender.com/goals?date=${dateKey}`)
         .then(res => res.json())
         .then(data => setGoals(Array.isArray(data) ? data : []))
         .catch(() => setGoals([]));
@@ -176,7 +176,7 @@ export default function Dashboard() {
   // Fetch spending for selected date
   useEffect(() => {
     const dateKey = selectedDate.toISOString().split('T')[0];
-    fetch(`http://127.0.0.1:5000/spending?date=${dateKey}`)
+  fetch(`https://mindnest-q3ss.onrender.com/spending?date=${dateKey}`)
       .then(res => res.json())
       .then(data => {
         setSpending(prev => ({ ...prev, [dateKey]: Array.isArray(data) ? data : [] }));
@@ -189,7 +189,7 @@ export default function Dashboard() {
     if (activeSection === "Calendar") {
       if (!inputValue) return;
       const dateKey = selectedDate.toISOString().split('T')[0];
-      fetch('http://127.0.0.1:5000/events', {
+  fetch('https://mindnest-q3ss.onrender.com/events', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: inputValue, date: dateKey })
@@ -210,7 +210,7 @@ export default function Dashboard() {
       if (!inputValue) return;
       // POST new habit to backend with date
       const dateKey = selectedDate.toISOString().split('T')[0];
-      fetch('http://127.0.0.1:5000/habits', {
+  fetch('https://mindnest-q3ss.onrender.com/habits', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ habit: inputValue, date: dateKey })
@@ -327,7 +327,7 @@ export default function Dashboard() {
                 />
                 <Button colorScheme="teal" onClick={() => {
                   if (!inputValue) return;
-                  fetch('http://127.0.0.1:5000/habits', {
+                  fetch('https://mindnest-q3ss.onrender.com/habits', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ habit: inputValue, date: dateKey })
@@ -380,7 +380,7 @@ export default function Dashboard() {
                 />
                 <Button colorScheme="teal" onClick={async () => {
                   if (!gratitudeInput.trim()) return;
-                  const res = await fetch('http://127.0.0.1:5000/gratitude', {
+                  const res = await fetch('https://mindnest-q3ss.onrender.com/gratitude', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ date: dateKey, entries: [gratitudeInput.trim()] })
@@ -428,7 +428,7 @@ export default function Dashboard() {
                 />
                 <Button colorScheme="teal" onClick={async () => {
                   if (!inputValue) return;
-                  const res = await fetch('http://127.0.0.1:5000/goals', {
+                  const res = await fetch('https://mindnest-q3ss.onrender.com/goals', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ title: inputValue, deadline: dateKey })
@@ -473,7 +473,7 @@ export default function Dashboard() {
                 />
                 <Button colorScheme="teal" onClick={() => {
                   if (!inputValue) return;
-                  fetch('http://127.0.0.1:5000/worries', {
+                  fetch('https://mindnest-q3ss.onrender.com/worries', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ name: inputValue.trim(), date: dateKey })
@@ -531,7 +531,7 @@ export default function Dashboard() {
                 />
                 <Button colorScheme="teal" onClick={async () => {
                   if (!spendingInput || !spendingItem) return;
-                  const res = await fetch('http://127.0.0.1:5000/spending', {
+                  const res = await fetch('https://mindnest-q3ss.onrender.com/spending', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ item: spendingItem, amount: Number(spendingInput), date: dateKey })
