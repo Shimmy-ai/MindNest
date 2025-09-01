@@ -244,52 +244,34 @@ export default function Dashboard() {
   return (
     <Box minH="100vh" bg={colorMode === "light" ? "gray.50" : "gray.800"}>
       <Box as="nav" p={4} bg={colorMode === "light" ? "white" : "gray.900"} boxShadow="md">
-          <Stack direction={{ base: "column", md: "row" }} spacing={2} align="center" justify="center">
-            {/* Top row: Calendar, Habits, Theme toggle */}
-            {[0, 1].map(idx => (
-              <Box as={motion.div} key={navItems[idx]}
-                animate={activeSection === navItems[idx] ? { scale: 1.15, boxShadow: "0 0 0 4px #31979533" } : { scale: 1, boxShadow: "none" }}
-                transition={{ type: "spring", stiffness: 300, damping: 20 }}>
-                <Button
-                  variant={activeSection === navItems[idx] ? "solid" : "ghost"}
-                  colorScheme="teal"
-                  size="md"
-                  fontWeight="bold"
-                  onClick={() => handleNavClick(navItems[idx])}
-                >
-                  {navItems[idx]}
-                </Button>
-              </Box>
-            ))}
-            <IconButton
-              aria-label="Toggle theme"
-              icon={colorMode === "light" ? <MoonIcon /> : <SunIcon />}
-              onClick={toggleColorMode}
-              colorScheme="teal"
-              size="md"
-              boxShadow="md"
-              ml={2}
-              transition="all 0.2s"
-            />
-          </Stack>
-          <Stack direction={{ base: "column", md: "row" }} spacing={2} align="center" justify="center" mt={2}>
-            {/* Second row: Goals, Worries, Gratitude, Spending */}
-            {navItems.slice(2).map(item => (
-              <Box as={motion.div} key={item}
-                animate={activeSection === item ? { scale: 1.15, boxShadow: "0 0 0 4px #31979533" } : { scale: 1, boxShadow: "none" }}
-                transition={{ type: "spring", stiffness: 300, damping: 20 }}>
-                <Button
-                  variant={activeSection === item ? "solid" : "ghost"}
-                  colorScheme="teal"
-                  size="md"
-                  fontWeight="bold"
-                  onClick={() => handleNavClick(item)}
-                >
-                  {item}
-                </Button>
-              </Box>
-            ))}
-          </Stack>
+        {/* On mobile, render all nav buttons and theme toggle in a single row for compactness */}
+        <Stack direction={{ base: "row", md: "row" }} wrap={{ base: "wrap", md: "nowrap" }} spacing={2} align="center" justify="center">
+          {navItems.map((item, idx) => (
+            <Box as={motion.div} key={item}
+              animate={activeSection === item ? { scale: 1.15, boxShadow: "0 0 0 4px #31979533" } : { scale: 1, boxShadow: "none" }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}>
+              <Button
+                variant={activeSection === item ? "solid" : "ghost"}
+                colorScheme="teal"
+                size="md"
+                fontWeight="bold"
+                onClick={() => handleNavClick(item)}
+              >
+                {item}
+              </Button>
+            </Box>
+          ))}
+          <IconButton
+            aria-label="Toggle theme"
+            icon={colorMode === "light" ? <MoonIcon /> : <SunIcon />}
+            onClick={toggleColorMode}
+            colorScheme="teal"
+            size="md"
+            boxShadow="md"
+            ml={2}
+            transition="all 0.2s"
+          />
+        </Stack>
       </Box>
       <Box p={8} display="flex" flexDirection="column" alignItems="center">
         <ScaleFade in={activeSection === "Calendar"} initialScale={0.8} unmountOnExit transition={{ enter: { duration: 0.6 }, exit: { duration: 0.3 } }}>
