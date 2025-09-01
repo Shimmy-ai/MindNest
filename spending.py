@@ -8,8 +8,7 @@ from datetime import datetime
 
 spending_bp = Blueprint('spending', __name__)
 
-DATA_DIR = os.environ.get("DATA_DIR", "/data")
-SPENDING_FILE = os.path.join(DATA_DIR, "spending.json")
+SPENDING_FILE = "spending.json"
 if not os.path.exists(SPENDING_FILE):
     with open(SPENDING_FILE, 'w', encoding='utf-8') as f:
         json.dump({}, f)

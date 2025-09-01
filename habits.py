@@ -2,7 +2,7 @@ import os
 DATA_DIR = os.environ.get("DATA_DIR", "/data")
 from flask import Flask, request, jsonify
 import json
-HABITS_FILE = os.path.join(DATA_DIR, "habits.json")
+HABITS_FILE = "habits.json"
 
 app = Flask(__name__)
 
