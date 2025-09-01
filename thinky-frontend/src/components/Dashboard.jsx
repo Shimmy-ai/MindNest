@@ -17,6 +17,7 @@ const initialQuotes = [
   "I don’t chase success. I let it chase me."
 ];
 import Calendar from 'react-calendar';
+const API_URL = import.meta.env.VITE_API_URL;
 import 'react-calendar/dist/Calendar.css';
 import { Box, Flex, Heading, Spacer, Button, IconButton, useColorMode, Input, Stack, ScaleFade } from "@chakra-ui/react";
 import { motion } from "framer-motion";
@@ -79,7 +80,7 @@ export default function Dashboard() {
   // Fetch events for selected date
   useEffect(() => {
     const dateKey = selectedDate.toISOString().split('T')[0];
-  fetch(`https://mindnest-q3ss.onrender.com/events?date=${dateKey}`)
+  fetch(`${API_URL}/events?date=${dateKey}`)
       .then(res => res.json())
       .then(data => {
         setEvents(prev => ({ ...prev, [dateKey]: Array.isArray(data) ? data : [] }));
@@ -135,7 +136,7 @@ export default function Dashboard() {
   // Fetch habits for selected date
   useEffect(() => {
     const dateKey = selectedDate.toISOString().split('T')[0];
-  fetch(`https://mindnest-q3ss.onrender.com/habits?date=${dateKey}`)
+  fetch(`${API_URL}/habits?date=${dateKey}`)
       .then(res => res.json())
       .then(data => setHabits(Array.isArray(data) ? data : []))
       .catch(() => setHabits([]));
@@ -144,7 +145,7 @@ export default function Dashboard() {
   const [gratitudeInput, setGratitudeInput] = useState("");
   useEffect(() => {
     const dateKey = selectedDate.toISOString().split('T')[0];
-  fetch(`https://mindnest-q3ss.onrender.com/gratitude?date=${dateKey}`)
+  fetch(`${API_URL}/gratitude?date=${dateKey}`)
       .then(res => res.json())
       .then(data => setGratitude(Array.isArray(data) ? data.map((entry, i) => ({ ...entry, display: `${dateKey}.${i+1}` })) : []))
       .catch(() => setGratitude([]));
@@ -153,7 +154,7 @@ export default function Dashboard() {
   const [worries, setWorries] = useState([]);
   useEffect(() => {
     const dateKey = selectedDate.toISOString().split('T')[0];
-  fetch(`https://mindnest-q3ss.onrender.com/worries?date=${dateKey}`)
+  fetch(`${API_URL}/worries?date=${dateKey}`)
       .then(res => res.json())
       .then(data => setWorries(Array.isArray(data) ? data : []))
       .catch(() => setWorries([]));
@@ -162,7 +163,7 @@ export default function Dashboard() {
   useEffect(() => {
     if (activeSection === "Goals") {
       const dateKey = selectedDate.toISOString().split('T')[0];
-  fetch(`https://mindnest-q3ss.onrender.com/goals?date=${dateKey}`)
+  fetch(`${API_URL}/goals?date=${dateKey}`)
         .then(res => res.json())
         .then(data => setGoals(Array.isArray(data) ? data : []))
         .catch(() => setGoals([]));
@@ -176,7 +177,7 @@ export default function Dashboard() {
   // Fetch spending for selected date
   useEffect(() => {
     const dateKey = selectedDate.toISOString().split('T')[0];
-  fetch(`https://mindnest-q3ss.onrender.com/spending?date=${dateKey}`)
+  fetch(`${API_URL}/spending?date=${dateKey}`)
       .then(res => res.json())
       .then(data => {
         setSpending(prev => ({ ...prev, [dateKey]: Array.isArray(data) ? data : [] }));
@@ -189,7 +190,7 @@ export default function Dashboard() {
     if (activeSection === "Calendar") {
       if (!inputValue) return;
       const dateKey = selectedDate.toISOString().split('T')[0];
-  fetch('https://mindnest-q3ss.onrender.com/events', {
+  fetch(`${API_URL}/events`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: inputValue, date: dateKey })
@@ -210,7 +211,7 @@ export default function Dashboard() {
       if (!inputValue) return;
       // POST new habit to backend with date
       const dateKey = selectedDate.toISOString().split('T')[0];
-  fetch('https://mindnest-q3ss.onrender.com/habits', {
+  fetch(`${API_URL}/habits`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ habit: inputValue, date: dateKey })
@@ -327,7 +328,7 @@ export default function Dashboard() {
                 />
                 <Button colorScheme="teal" onClick={() => {
                   if (!inputValue) return;
-                  fetch('https://mindnest-q3ss.onrender.com/habits', {
+                  fetch(`${API_URL}/habits`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ habit: inputValue, date: dateKey })
@@ -380,7 +381,7 @@ export default function Dashboard() {
                 />
                 <Button colorScheme="teal" onClick={async () => {
                   if (!gratitudeInput.trim()) return;
-                  const res = await fetch('https://mindnest-q3ss.onrender.com/gratitude', {
+                  const res = await fetch(`${API_URL}/gratitude`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ date: dateKey, entries: [gratitudeInput.trim()] })
@@ -428,7 +429,7 @@ export default function Dashboard() {
                 />
                 <Button colorScheme="teal" onClick={async () => {
                   if (!inputValue) return;
-                  const res = await fetch('https://mindnest-q3ss.onrender.com/goals', {
+                  const res = await fetch(`${API_URL}/goals`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ title: inputValue, deadline: dateKey })
@@ -473,7 +474,7 @@ export default function Dashboard() {
                 />
                 <Button colorScheme="teal" onClick={() => {
                   if (!inputValue) return;
-                  fetch('https://mindnest-q3ss.onrender.com/worries', {
+                  fetch(`${API_URL}/worries`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ name: inputValue.trim(), date: dateKey })
@@ -531,7 +532,7 @@ export default function Dashboard() {
                 />
                 <Button colorScheme="teal" onClick={async () => {
                   if (!spendingInput || !spendingItem) return;
-                  const res = await fetch('https://mindnest-q3ss.onrender.com/spending', {
+                  const res = await fetch(`${API_URL}/spending`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ item: spendingItem, amount: Number(spendingInput), date: dateKey })
