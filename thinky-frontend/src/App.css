@@ -51,22 +51,28 @@
     padding: 1em;
   }
   nav, .chakra-stack {
-    flex-direction: column !important;
-    align-items: stretch !important;
-    gap: 0.5rem !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.3rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+  .chakra-stack:nth-of-type(2) {
+    margin-top: 0 !important;
   }
   .chakra-button, .chakra-iconbutton {
-    font-size: 1rem !important;
-    padding: 0.5em 0.8em !important;
-    min-width: 120px !important;
-    margin: 0.2em 0 !important;
+    font-size: 0.95rem !important;
+    padding: 0.4em 0.7em !important;
+    min-width: 90px !important;
+    margin: 0.15em !important;
   }
   .chakra-heading {
-    font-size: 1.1rem !important;
+    font-size: 1rem !important;
   }
   .chakra-input {
-    font-size: 1rem !important;
-    padding: 0.5em !important;
+    font-size: 0.95rem !important;
+    padding: 0.4em !important;
   }
   .react-calendar {
     width: 100% !important;
@@ -74,11 +80,11 @@
     font-size: 0.95rem !important;
   }
   .react-calendar__tile {
-    padding: 0.5em 0 !important;
-    min-height: 2.2em !important;
+    padding: 0.4em 0 !important;
+    min-height: 2em !important;
   }
   .chakra-box {
-    padding: 0.5em !important;
-    margin-bottom: 0.5em !important;
+    padding: 0.4em !important;
+    margin-bottom: 0.4em !important;
   }
 }
