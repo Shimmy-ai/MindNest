@@ -1,6 +1,6 @@
 import os
 DATA_DIR = os.environ.get("DATA_DIR", "/data")
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, Response
 import json
 WORRIES_FILE = os.path.join(DATA_DIR, "worries.json")
 import os
@@ -10,6 +10,24 @@ WORRIES_FILE = "/tmp/worries.json"
 if not os.path.exists(WORRIES_FILE):
     with open(WORRIES_FILE, 'w') as f:
         json.dump([], f)
+
+@worries_bp.route('/worries/export_md', methods=['GET'])
+def export_worries_md():
+    import datetime
+    if not os.path.exists(WORRIES_FILE):
+        return Response('# Worries\n\nNo worries found.', mimetype='text/markdown')
+    with open(WORRIES_FILE, 'r') as f:
+        worries = json.load(f)
+    md = ['# Worries\n']
+    for worry in worries:
+        date = worry.get('date', '')
+        name = worry.get('name', '')
+        desc = worry.get('description', '')
+        resolved = '✅' if worry.get('resolved') else ''
+        md.append(f"- **{date}**: {name} {desc} {resolved}")
+    md_content = '\n'.join(md)
+    filename = f"worries_{datetime.date.today()}.md"
+    return Response(md_content, mimetype='text/markdown', headers={"Content-Disposition": f"attachment; filename={filename}"})
 
 @worries_bp.route('/worries', methods=['GET'])
 def get_worries():

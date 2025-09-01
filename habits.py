@@ -1,6 +1,6 @@
 import os
 DATA_DIR = os.environ.get("DATA_DIR", "/data")
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, Response
 import json
 HABITS_FILE = "/tmp/habits.json"
 
@@ -27,6 +27,25 @@ def save_habits(habits):
 
 habits = load_habits()
 next_id = max([h.get("id", 0) for h in habits], default=0) + 1
+
+@app.route("/habits/export_md", methods=["GET"])
+def export_habits_md():
+  import datetime
+  if os.path.exists(HABITS_FILE):
+    with open(HABITS_FILE, "r") as f:
+      habits = json.load(f)
+  else:
+    habits = []
+  md = ['# Habits\n']
+  for habit in habits:
+    date = habit.get("date", "")
+    text = habit.get("text", "")
+    freq = habit.get("frequency", "Daily")
+    streak = habit.get("streak", 0)
+    md.append(f"- **{date}**: {text} ({freq}, Streak: {streak})")
+  md_content = '\n'.join(md)
+  filename = f"habits_{datetime.date.today()}.md"
+  return Response(md_content, mimetype='text/markdown', headers={"Content-Disposition": f"attachment; filename={filename}"})
 
 @app.route("/habits", methods=["GET"])
 def get_habits():

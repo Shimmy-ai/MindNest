@@ -1,12 +1,28 @@
 import os
 DATA_DIR = os.environ.get("DATA_DIR", "/data")
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, Response
 import json
 GOALS_FILE = os.path.join(DATA_DIR, "goals.json")
 
 GOALS_FILE = "/tmp/goals.json"
 
 goals_bp = Blueprint('goals', __name__)
+
+@goals_bp.route('/goals/export_md', methods=['GET'])
+def export_goals_md():
+    import datetime
+    if not os.path.exists(GOALS_FILE):
+        return Response('# Goals\n\nNo goals found.', mimetype='text/markdown')
+    with open(GOALS_FILE, 'r') as f:
+        goals = json.load(f)
+    md = ['# Goals\n']
+    for goal in goals:
+        md.append(f"- **{goal.get('name', 'Untitled')}**: {goal.get('description', '')} ")
+        if goal.get('completed'):
+            md[-1] += '✅'
+    md_content = '\n'.join(md)
+    filename = f"goals_{datetime.date.today()}.md"
+    return Response(md_content, mimetype='text/markdown', headers={"Content-Disposition": f"attachment; filename={filename}"})
 
 @goals_bp.route('/goals', methods=['GET'])
 def get_goals():

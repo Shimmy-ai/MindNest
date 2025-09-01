@@ -1,6 +1,6 @@
 import os
 DATA_DIR = os.environ.get("DATA_DIR", "/data")
-from flask import Flask, Blueprint, request, jsonify
+from flask import Flask, Blueprint, request, jsonify, Response
 import json
 DATA_FILE = os.path.join(DATA_DIR, "gratitude.json")
 from datetime import datetime
@@ -23,6 +23,19 @@ def read_gratitude():
 def write_gratitude(entries):
     with open(DATA_FILE, 'w', encoding='utf-8') as f:
         json.dump(entries, f)
+
+@gratitude_bp.route('/gratitude/export_md', methods=['GET'])
+def export_gratitude_md():
+    import datetime
+    all_entries = read_gratitude()
+    md = ['# Gratitude Journal\n']
+    for date, entries in all_entries.items():
+        md.append(f"## {date}")
+        for entry in entries:
+            md.append(f"- {entry.get('label', '')}: {entry.get('text', '')}")
+    md_content = '\n'.join(md)
+    filename = f"gratitude_{datetime.date.today()}.md"
+    return Response(md_content, mimetype='text/markdown', headers={"Content-Disposition": f"attachment; filename={filename}"})
 
 @gratitude_bp.route('/gratitude', methods=['GET'])
 def get_gratitude():
