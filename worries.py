@@ -1,9 +1,14 @@
 from flask import Blueprint, request, jsonify
 import json
 import os
+import os
 
 worries_bp = Blueprint('worries', __name__)
-WORRIES_FILE = 'worries.json'
+DATA_DIR = os.environ.get("DATA_DIR", "/data")
+WORRIES_FILE = os.path.join(DATA_DIR, "worries.json")
+if not os.path.exists(WORRIES_FILE):
+    with open(WORRIES_FILE, 'w') as f:
+        json.dump([], f)
 
 @worries_bp.route('/worries', methods=['GET'])
 def get_worries():

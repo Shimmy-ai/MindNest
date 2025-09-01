@@ -5,7 +5,8 @@ import os
 app = Flask(__name__)
 
 # File for persistence
-HABITS_FILE = "habits.json"
+DATA_DIR = os.environ.get("DATA_DIR", "/data")
+HABITS_FILE = os.path.join(DATA_DIR, "habits.json")
 
 
 # Load habits from file
@@ -15,8 +16,10 @@ def load_habits():
             habits = json.load(f)
             print(f"Loaded habits from file: {habits}")
             return habits
-    print("No habits file found, starting with empty list.")
-    return []
+  with open(HABITS_FILE, "w") as f:
+    json.dump([], f)
+  print("No habits file found, starting with empty list.")
+  return []
 
 # Save habits to file
 def save_habits(habits):

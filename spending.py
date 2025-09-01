@@ -1,11 +1,16 @@
 from flask import Blueprint, request, jsonify
 import json
 import os
+import os
 from datetime import datetime
 
 spending_bp = Blueprint('spending', __name__)
 
-SPENDING_FILE = 'spending.json'
+DATA_DIR = os.environ.get("DATA_DIR", "/data")
+SPENDING_FILE = os.path.join(DATA_DIR, "spending.json")
+if not os.path.exists(SPENDING_FILE):
+    with open(SPENDING_FILE, 'w', encoding='utf-8') as f:
+        json.dump({}, f)
 
 def load_spending():
     if not os.path.exists(SPENDING_FILE):

@@ -5,10 +5,13 @@ from datetime import datetime
 
 app = Flask(__name__)
 gratitude_bp = Blueprint('gratitude', __name__)
-DATA_FILE = 'gratitude.json'
+DATA_DIR = os.environ.get("DATA_DIR", "/data")
+DATA_FILE = os.path.join(DATA_DIR, "gratitude.json")
 
 def read_gratitude():
     if not os.path.exists(DATA_FILE):
+        with open(DATA_FILE, 'w', encoding='utf-8') as f:
+            json.dump({}, f)
         return {}
     with open(DATA_FILE, 'r', encoding='utf-8') as f:
         try:

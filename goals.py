@@ -2,12 +2,16 @@ from flask import Blueprint, request, jsonify
 import json
 import os
 
+DATA_DIR = os.environ.get("DATA_DIR", "/data")
+GOALS_FILE = os.path.join(DATA_DIR, "goals.json")
+
 goals_bp = Blueprint('goals', __name__)
-GOALS_FILE = 'goals.json'
 
 @goals_bp.route('/goals', methods=['GET'])
 def get_goals():
     if not os.path.exists(GOALS_FILE):
+        with open(GOALS_FILE, 'w') as f:
+            json.dump([], f)
         return jsonify([])
     with open(GOALS_FILE, 'r') as f:
         goals = json.load(f)

@@ -13,7 +13,10 @@ app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 
 # Database setup (SQLite file in project root)
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///thinky.db"
+import os
+DATA_DIR = os.environ.get("DATA_DIR", "/data")
+db_path = os.path.join(DATA_DIR, "thinky.db")
+app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{db_path}"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db.init_app(app)
