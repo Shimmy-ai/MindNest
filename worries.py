@@ -1,6 +1,9 @@
+import os
+DATA_DIR = os.environ.get("DATA_DIR", "/data")
+os.makedirs(DATA_DIR, exist_ok=True)
 from flask import Blueprint, request, jsonify
 import json
-import os
+WORRIES_FILE = os.path.join(DATA_DIR, "worries.json")
 import os
 
 worries_bp = Blueprint('worries', __name__)

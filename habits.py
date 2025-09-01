@@ -1,8 +1,8 @@
-from flask import Flask, request, jsonify
-import json
 import os
 DATA_DIR = os.environ.get("DATA_DIR", "/data")
 os.makedirs(DATA_DIR, exist_ok=True)
+from flask import Flask, request, jsonify
+import json
 HABITS_FILE = os.path.join(DATA_DIR, "habits.json")
 
 app = Flask(__name__)

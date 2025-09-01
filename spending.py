@@ -1,6 +1,9 @@
+import os
+DATA_DIR = os.environ.get("DATA_DIR", "/data")
+os.makedirs(DATA_DIR, exist_ok=True)
 from flask import Blueprint, request, jsonify
 import json
-import os
+SPENDING_FILE = os.path.join(DATA_DIR, "spending.json")
 import os
 from datetime import datetime
 
