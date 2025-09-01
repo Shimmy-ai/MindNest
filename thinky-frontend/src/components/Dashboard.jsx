@@ -244,8 +244,14 @@ export default function Dashboard() {
   return (
     <Box minH="100vh" bg={colorMode === "light" ? "gray.50" : "gray.800"}>
       <Box as="nav" p={4} bg={colorMode === "light" ? "white" : "gray.900"} boxShadow="md">
-        {/* On mobile, render all nav buttons and theme toggle in a single row for compactness */}
-        <Stack direction={{ base: "row", md: "row" }} wrap={{ base: "wrap", md: "nowrap" }} spacing={2} align="center" justify="center">
+        {/* Use Flex for compact horizontal nav on mobile */}
+        <Flex
+          direction={{ base: "row", md: "row" }}
+          wrap={{ base: "wrap", md: "nowrap" }}
+          gap={2}
+          align="center"
+          justify="center"
+        >
           {navItems.map((item, idx) => (
             <Box as={motion.div} key={item}
               animate={activeSection === item ? { scale: 1.15, boxShadow: "0 0 0 4px #31979533" } : { scale: 1, boxShadow: "none" }}
@@ -256,6 +262,8 @@ export default function Dashboard() {
                 size="md"
                 fontWeight="bold"
                 onClick={() => handleNavClick(item)}
+                minW="90px"
+                mb={{ base: 2, md: 0 }}
               >
                 {item}
               </Button>
@@ -271,7 +279,7 @@ export default function Dashboard() {
             ml={2}
             transition="all 0.2s"
           />
-        </Stack>
+        </Flex>
       </Box>
       <Box p={8} display="flex" flexDirection="column" alignItems="center">
         <ScaleFade in={activeSection === "Calendar"} initialScale={0.8} unmountOnExit transition={{ enter: { duration: 0.6 }, exit: { duration: 0.3 } }}>
